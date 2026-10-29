@@ -15,7 +15,7 @@ To move all of this to another AI, see `SWITCHING.md`.
 
 1. Install **Scriptable** from the App Store.
 2. For each villager, make a new script with exactly their name (**Muhammad**, **Ahmed**, **Othman**, **Mustafa**, **Saladin**, **Muse**), and paste in their file from `scriptable/villagers/`.
-3. Open **Muhammad** once. It asks for the village's address (the Netlify link, like `https://your-site.netlify.app/`). The other villagers remember it.
+3. The scripts already know the village's address, `https://souqvillage.netlify.app/`. If it ever moves, change `VILLAGE_URL` near the top of each script.
 
 The villager scripts download **Souq Core** from the village by themselves, and keep it up to date. You never edit it.
 

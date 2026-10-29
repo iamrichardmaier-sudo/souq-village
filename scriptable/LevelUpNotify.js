@@ -8,7 +8,7 @@
 // Each level-up notifies once; tapping it opens the village.
 
 // The village's address: the one your villager scripts saved, or set it here (ending with /).
-const VILLAGE_URL = Keychain.contains("souq.villageURL") ? Keychain.get("souq.villageURL") : "https://YOUR-SITE.netlify.app/";
+const VILLAGE_URL = Keychain.contains("souq.villageURL") ? Keychain.get("souq.villageURL") : "https://souqvillage.netlify.app/";
 
 async function loadGlobal(path, name) {
   const txt = await new Request(VILLAGE_URL + path + "?t=" + Date.now()).loadString();

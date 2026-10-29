@@ -4,7 +4,6 @@
 
 // Saladin, Souq al-Qamar. Paste this into a new Scriptable script named "Saladin".
 // Add a Scriptable widget and pick "Saladin". No parameter needed.
-// The first time you open it, it asks for the village's address.
 // Everything else lives in "Souq Core", which this keeps up to date.
 
 const AGENT = "saladin";
@@ -13,28 +12,12 @@ const here = module.filename;
 const fm = here.includes("Mobile Documents") ? FileManager.iCloud() : FileManager.local();
 const corePath = fm.joinPath(here.substring(0, here.lastIndexOf("/")), "Souq Core.js");
 
-if (!Keychain.contains("souq.villageURL")) {
-  if (config.runsInWidget) {
-    const w = new ListWidget();
-    w.addText("Open Saladin in Scriptable once to finish setup.").font = Font.mediumSystemFont(13);
-    Script.setWidget(w);
-    Script.complete();
-    return;
-  }
-  const a = new Alert();
-  a.title = "Where is the village?";
-  a.message = "The village's web address, like https://your-site.netlify.app/";
-  a.addTextField("https://", "");
-  a.addAction("Save");
-  a.addCancelAction("Cancel");
-  if ((await a.present()) === -1) return;
-  let url = a.textFieldValue(0).trim();
-  if (!url.endsWith("/")) url += "/";
-  Keychain.set("souq.villageURL", url);
-}
+// The village's web address. Every Souq script on this phone uses it.
+const VILLAGE_URL = "https://souqvillage.netlify.app/";
+Keychain.set("souq.villageURL", VILLAGE_URL);
 
 try {
-  const code = await new Request(Keychain.get("souq.villageURL") + "scriptable/SouqCore.js?t=" + Date.now()).loadString();
+  const code = await new Request(VILLAGE_URL + "scriptable/SouqCore.js?t=" + Date.now()).loadString();
   if (code.includes("module.exports.run")) fm.writeString(corePath, code);
 } catch (e) {}
 
