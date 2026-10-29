@@ -201,10 +201,13 @@
     }).join("");
     const friendRows = AG.list.map((a) => `<li><b>${V.esc(a.data.name)}</b> <span class="hearts" style="font-size:16px">${heartRow(a.id)}</span>${pendingFriend(a.id) ? ` <span class="small today">+${pendingFriend(a.id)}</span>` : ""}</li>`).join("");
     const t = AG.player().today || {};
+    const pets = window.VILLAGE_PETS || [], owned = new Set(AG.player().pets || []);
     const counted = AG.P.sources.filter((s) => t[s.id]).map((s) => `<li>${V.esc(s.label)}: <b>${fmt(t[s.id])}</b></li>`).join("");
     $("skillsBody").innerHTML = `${skillRows}
       <div class="card"><h4>Friendship</h4><ul class="log">${friendRows}</ul>
       <p class="note">Hearts grow when you do what someone specializes in. Each person gives at most ${P.DAILY_FRIENDSHIP_CAP} points a day.</p></div>
+      <div class="card"><h4>Pets</h4><p class="note">Villagers will give you pets for quests. ${owned.size} of ${pets.length} found.</p>
+        <div class="pets">${pets.map((p) => `<div class="pet t${p.tier}${owned.has(p.n) ? "" : " locked"}"><img src="assets/pets/${String(p.n).padStart(2, "0")}.png" alt="${owned.has(p.n) ? V.esc(p.name) : "Not found yet"}" loading="lazy">${owned.has(p.n) ? V.esc(p.name) : "?"}</div>`).join("")}</div></div>
       <div class="card"><h4>Counted so far today</h4>${counted ? `<ul class="log">${counted}</ul>` : `<p class="note">Nothing yet today. XP turns into levels at the end of the day.</p>`}</div>`;
   };
 
