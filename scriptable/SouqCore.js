@@ -720,6 +720,12 @@ if (D.compose && !showQuest) setTimeout(() => $("box").focus(), 300);
 // for your time and weather, who has news, and a tap that opens the game.
 module.exports.village = async function village() {
   const VILLAGE_URL = Keychain.get(KEY.url);
+  // Tapped or run in the app: go straight to the game. Only the widget draws the picture.
+  // (Add ?preview=1 to the run link to see the widget instead.)
+  if (!config.runsInWidget && !(args.queryParameters || {}).preview) {
+    Safari.open(VILLAGE_URL);
+    return;
+  }
   const fm = FileManager.local();
   const dir = fm.joinPath(fm.documentsDirectory(), "souq-chat");
   if (!fm.fileExists(dir)) fm.createDirectory(dir, true);
@@ -884,7 +890,5 @@ module.exports.village = async function village() {
   }
 
   if (config.runsInWidget) Script.setWidget(w);
-  else if (family === "small") await w.presentSmall();
-  else if (family === "large") await w.presentLarge();
   else await w.presentMedium();
 };
