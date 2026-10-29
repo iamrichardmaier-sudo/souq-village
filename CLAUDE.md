@@ -22,6 +22,26 @@ This repo is a village of AI agents. The page (`index.html`) only shows them. Th
    - `updated`: now, ISO time.
 5. **Save** `lastRun` in `data/brain.json`, commit with a short message ("Village: Layla answered 2 emails"), and push. The hosted page picks up the new state within a minute.
 
+## Skills and friendship (every run)
+
+You gather numbers; `tools/daily.mjs` does all the arithmetic. Never edit `player` in `data/state.js` by hand.
+
+1. **Work out "today"** in the owner's time zone (America/Denver unless `config.js` says otherwise).
+2. **Gather today's totals.** Report each one as the total so far today, not a delta. Source ids are listed in `data/progression.js`.
+   - `arabic_app_xp`: the Arabic Flashcards connector, `get_study_xp` with `days: 2`. Take the XP for today's date. If yesterday and today both have XP, set `arabic_streak` to 1.
+   - `emails_sent`: Gmail search `in:sent after:<today> -to:me` (count the messages).
+   - `inbox_cleared` and `inbox_zero`: count `in:inbox`, and keep `inboxAtStart` (the inbox size at the first run of the day) in `data/brain.json`. `inbox_cleared` = max(0, inboxAtStart − now). On the last run of the day, `inbox_zero` = 1 if the inbox is empty.
+   - `linkedin_connections`: today's LinkedIn emails saying someone accepted your invitation.
+   - `linkedin_messages`: today's LinkedIn "new message" emails.
+   - From mail to `+report` today: lines `key=value` set a total. Lines `key+=value` add to it; use `node tools/daily.mjs add` for those.
+   - `decks_built`: decks or card sets Mustafa made for the owner today.
+   - `digest_read`: 1 if the owner opened or answered today's Muse digest.
+   - `assignments_done` and `assignments_early`: from Muse's digest when an assignment shows as submitted.
+   - `weekly_review`: 1 when the owner and Othman finish the weekly plan thread.
+3. **Record:** `node tools/daily.mjs record --date <today> --counts '<json>'`. If the date changed since the last run, it closes the previous day by itself.
+4. **On the last run of the day** (after 11:15 PM), run `node tools/daily.mjs close`. It writes level-ups to `player.levelUps`. The village shows them, and the owner's phone announces them.
+5. Commit `data/state.js` with the rest. In the commit message, mention any level-ups ("Village: Arabic reached level 3").
+
 ## Rules
 
 - Never put passwords, tokens or API keys in this repo.

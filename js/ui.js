@@ -29,6 +29,8 @@
     $("vName").textContent = cfg.villageName || "Souq al-Qamar";
     $("vNameAr").textContent = cfg.villageNameArabic || "";
     document.title = cfg.villageName || document.title;
+    $("btnSkills").onclick = () => { V.audio.sfx("click"); UI.toggleSheet("skillsSheet"); UI.renderSkills(); };
+    $("luOk").onclick = () => UI.nextLevelUp();
     $("btnPlaces").onclick = () => { V.audio.sfx("click"); UI.toggleSheet("placesSheet"); UI.renderPlaces(); };
     const snd = $("btnSound");
     const paint = () => { snd.textContent = V.audio.on ? "🔊" : "🔇"; snd.setAttribute("aria-pressed", V.audio.on); };
@@ -41,7 +43,7 @@
 
   UI.toggleSheet = (id) => { const el = $(id); el.classList.contains("open") ? UI.close(id) : UI.open(id); };
   UI.open = (id) => {
-    ["placesSheet", "roomSheet"].forEach((s) => s !== id && UI.close(s));
+    ["placesSheet", "roomSheet", "skillsSheet"].forEach((s) => s !== id && UI.close(s));
     $(id).classList.add("open"); $(id).setAttribute("aria-hidden", "false");
   };
   UI.close = (id) => {
@@ -105,7 +107,8 @@
     else if (h.startsWith("agent-") && AG.byId[h.slice(6)]) UI.enter(AG.byId[h.slice(6)].home.id);
   };
 
-  const hearts = (n) => { const k = n % 5; return "♥".repeat(k) + "♡".repeat(5 - k); };
+  const heartRow = (id) => { const P = AG.P, n = AG.hearts(id); return "♥".repeat(n) + "♡".repeat(P.MAX_HEARTS - n); };
+  const fmt = (n) => Math.round(n).toLocaleString();
 
   const card = (a) => {
     const st = AG.st(a.id), d = a.data, msg = AG.hasMessage(a.id);
@@ -121,10 +124,11 @@
         ${d.placeholder ? `<span class="status">Sample resident</span>` : ""}
       </div>
       <p><b>Personality:</b> ${V.esc(d.personality || "")}</p>
-      <div class="hearts" aria-label="${AG.hearts(a.id) % 5} of 5 hearts toward the next level">${hearts(AG.hearts(a.id))}</div>
+      <div class="hearts" aria-label="${AG.hearts(a.id)} of ${AG.P.MAX_HEARTS} hearts">${heartRow(a.id)}</div>
+      <div class="small">${AG.hearts(a.id) >= AG.P.MAX_HEARTS ? "Best friends." : `${fmt(AG.points(a.id) % AG.P.HEART_POINTS)} / ${AG.P.HEART_POINTS} toward the next heart`}${pendingFriend(a.id) ? ` · <span class="today">+${pendingFriend(a.id)} today</span>` : ""}</div>
       <div class="stats">
-        <div><b>${AG.level(a.id)}</b><span>Level</span></div>
         <div><b>${AG.hearts(a.id)}</b><span>Hearts</span></div>
+        <div><b>${AG.skillOf(a.id) ? AG.skillProgress(AG.skillOf(a.id).id).level : "–"}</b><span>${AG.skillOf(a.id) ? V.esc(AG.skillOf(a.id).name) : "Skill"}</span></div>
         <div><b>${st.tasksDone || 0}</b><span>Tasks</span></div>
         <div><b>${AG.friends(a.id)}</b><span>Friends</span></div>
       </div>
@@ -132,7 +136,6 @@
       <div class="actions">
         <a class="btn primary" href="${mailto(a.id)}">Email ${V.esc(d.name)}</a>
         ${waLink ? `<a class="btn" href="${waLink}" target="_blank" rel="noopener">WhatsApp</a>` : ""}
-        <button class="btn" data-heart="${a.id}">♥ Give a heart</button>
         ${msg ? `<button class="btn" data-read="${a.id}">Mark read</button>` : ""}
       </div>
       ${others.length ? `<div class="talk"><label for="talk-${a.id}">Ask ${V.esc(d.name)} to talk to</label>
@@ -173,13 +176,61 @@
       const done = () => { b.textContent = "Copied"; setTimeout(() => (b.textContent = "Copy"), 1500); };
       try { navigator.clipboard.writeText(text).then(done, () => UI.selectText(b.previousElementSibling)); } catch (e) { UI.selectText(b.previousElementSibling); }
     }));
-    box.querySelectorAll("[data-heart]").forEach((b) => (b.onclick = () => { AG.giveHeart(b.dataset.heart); UI.renderRoom(); }));
     box.querySelectorAll("[data-read]").forEach((b) => (b.onclick = () => { AG.markRead(b.dataset.read); UI.renderRoom(); }));
     box.querySelectorAll("[data-talk]").forEach((s) => (s.onchange = () => {
       const link = box.querySelector(`[data-talk-send="${s.dataset.talk}"]`);
       link.href = mailto(s.dataset.talk, AG.byId[s.value].data.name + ": ");
     }));
   };
+  // What today's counts will be worth tonight.
+  const pending = () => AG.P.gainsFor(AG.player().today || {});
+  const pendingFriend = (id) => pending().friendship[id] || 0;
+
+  UI.renderSkills = () => {
+    const P = AG.P, pend = pending();
+    const skillRows = P.skills.map((s) => {
+      const pr = AG.skillProgress(s.id), agent = AG.byId[s.agent];
+      const pips = Array.from({ length: P.MAX_LEVEL }, (_, i) => `<span class="${i < pr.level ? "on" : ""}"></span>`).join("");
+      const today = pend.skills[s.id] || 0;
+      return `<div class="card skill"><div class="ic">${s.icon}</div><div>
+        <div class="row1"><b>${V.esc(s.name)} <span class="ar" lang="ar">${V.esc(s.ar)}</span></b><span class="lv">Level ${pr.level} / ${P.MAX_LEVEL}</span></div>
+        <div class="pips" aria-hidden="true">${pips}</div>
+        <div class="bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${Math.round(pr.fraction * 100)}"><i style="width:${(pr.fraction * 100).toFixed(1)}%"></i></div>
+        <div class="small">${pr.next == null ? "Mastered." : `${fmt(pr.into)} / ${fmt(pr.next - pr.floor)} XP to level ${pr.level + 1}`}${today ? ` · <span class="today">+${fmt(today)} today, counted tonight</span>` : ""}${agent ? ` · with ${V.esc(agent.data.name)}` : ""}</div>
+      </div></div>`;
+    }).join("");
+    const friendRows = AG.list.map((a) => `<li><b>${V.esc(a.data.name)}</b> <span class="hearts" style="font-size:16px">${heartRow(a.id)}</span>${pendingFriend(a.id) ? ` <span class="small today">+${pendingFriend(a.id)}</span>` : ""}</li>`).join("");
+    const t = AG.player().today || {};
+    const counted = AG.P.sources.filter((s) => t[s.id]).map((s) => `<li>${V.esc(s.label)}: <b>${fmt(t[s.id])}</b></li>`).join("");
+    $("skillsBody").innerHTML = `${skillRows}
+      <div class="card"><h4>Friendship</h4><ul class="log">${friendRows}</ul>
+      <p class="note">Hearts grow when you do what someone specializes in. Each person gives at most ${P.DAILY_FRIENDSHIP_CAP} points a day.</p></div>
+      <div class="card"><h4>Counted so far today</h4>${counted ? `<ul class="log">${counted}</ul>` : `<p class="note">Nothing yet today. XP turns into levels at the end of the day.</p>`}</div>`;
+  };
+
+  // Level-ups written by the end-of-day script, shown once each.
+  UI.levelQueue = [];
+  UI.checkLevelUps = () => {
+    const seen = new Set(V.store.get("seenLevelUps", []));
+    const ups = (AG.player().levelUps || []).filter((u) => !seen.has(u.date + u.kind + u.id + (u.level || u.hearts)));
+    ups.forEach((u) => seen.add(u.date + u.kind + u.id + (u.level || u.hearts)));
+    V.store.set("seenLevelUps", [...seen].slice(-300));
+    UI.levelQueue.push(...ups);
+    if ($("levelUp").hidden) UI.nextLevelUp();
+  };
+  UI.nextLevelUp = () => {
+    const u = UI.levelQueue.shift();
+    if (!u) { $("levelUp").hidden = true; return; }
+    const s = u.kind === "skill" ? AG.P.skill(u.id) : null, a = AG.byId[u.kind === "heart" ? u.id : s?.agent];
+    $("luIcon").textContent = s ? s.icon : "♥";
+    $("luKicker").textContent = s ? "Level up!" : "New heart!";
+    $("luText").textContent = s ? `${s.name} level ${u.level}` : `${a ? a.data.name : u.id}: ${u.hearts} ♥`;
+    $("luSub").textContent = s ? (a ? `${a.data.name} is proud of you.` : "") : `You and ${a ? a.data.name : "your friend"} are growing closer.`;
+    $("levelUp").hidden = false;
+    V.audio.sfx("heart");
+    if (a) AG.burst(a, 3);
+  };
+
   UI.selectText = (el) => { try { const r = document.createRange(); r.selectNodeContents(el); const s = getSelection(); s.removeAllRanges(); s.addRange(r); } catch (e) {} };
 
   UI.portrait = (c, a) => {

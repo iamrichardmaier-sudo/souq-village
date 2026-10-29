@@ -123,6 +123,25 @@ button:focus-visible, a:focus-visible, select:focus-visible { outline: 3px solid
 .note { font-size: 14px; color: var(--ink-soft); line-height: 1.4; margin: 0; }
 h4 { margin: 0; font-family: var(--font-display); font-size: 17px; }
 
+.skill { display: grid; grid-template-columns: 44px 1fr; gap: 10px; align-items: center; }
+.skill .ic { font-size: 28px; text-align: center; }
+.skill .row1 { display: flex; justify-content: space-between; gap: 8px; align-items: baseline; flex-wrap: wrap; }
+.skill .row1 b { font-family: var(--font-display); font-size: 18px; }
+.skill .lv { font-family: var(--font-display); color: var(--teal); font-variant-numeric: tabular-nums; }
+.bar { height: 10px; border: 1.5px solid var(--ink); border-radius: 999px; background: var(--paper); overflow: hidden; margin-top: 4px; }
+.bar > i { display: block; height: 100%; background: linear-gradient(90deg, var(--saffron), var(--rose)); }
+.pips { display: flex; gap: 2px; margin-top: 4px; }
+.pips span { flex: 1; height: 6px; border-radius: 3px; background: var(--shade); }
+.pips span.on { background: var(--teal); }
+.small { font-size: 13px; color: var(--ink-soft); font-variant-numeric: tabular-nums; }
+.today { color: var(--rose); }
+#levelUp { position: fixed; z-index: 40; left: 50%; top: 50%; transform: translate(-50%, -50%); width: min(340px, calc(100vw - 32px));
+  padding: 20px 18px 16px; text-align: center; display: flex; flex-direction: column; gap: 6px; align-items: center; animation: pop .4s ease-out; }
+#levelUp[hidden] { display: none; }
+.lu-icon { font-size: 54px; line-height: 1; }
+.lu-kicker { font-family: var(--font-display); color: var(--saffron); letter-spacing: .12em; text-transform: uppercase; font-size: 14px; }
+.lu-text { font-family: var(--font-display); font-size: 24px; text-wrap: balance; }
+.lu-sub { color: var(--ink-soft); font-size: 15px; }
 #toasts { position: fixed; z-index: 30; left: 50%; transform: translateX(-50%); top: calc(70px + env(safe-area-inset-top, 0px)); display: flex; flex-direction: column; gap: 6px; align-items: center; pointer-events: none; }
 .toast { padding: 6px 14px; font-size: 16px; animation: pop .35s ease-out; }
 @keyframes pop { from { transform: scale(.8); opacity: 0; } to { transform: none; opacity: 1; } }
@@ -146,6 +165,7 @@ h4 { margin: 0; font-family: var(--font-display); font-size: 17px; }
 </div>
 
 <div id="tools">
+  <button class="tool panel" id="btnSkills" aria-label="Skills" title="Skills">📜</button>
   <button class="tool panel" id="btnPlaces" aria-label="Places" title="Places">🗺️</button>
   <button class="tool panel" id="btnSound" aria-label="Sound" aria-pressed="false" title="Sound">🔇</button>
 </div>
@@ -156,6 +176,19 @@ h4 { margin: 0; font-family: var(--font-display); font-size: 17px; }
   <header><h2>Places in the souq</h2><button class="close" data-close="placesSheet" aria-label="Close">✕</button></header>
   <div class="body"><div class="place-list" id="placeList"></div></div>
 </aside>
+
+<aside id="skillsSheet" class="sheet panel" aria-label="Skills" aria-hidden="true">
+  <header><h2>Skills &amp; friendship</h2><button class="close" data-close="skillsSheet" aria-label="Close">✕</button></header>
+  <div class="body" id="skillsBody"></div>
+</aside>
+
+<div id="levelUp" class="panel" role="dialog" aria-live="assertive" hidden>
+  <div class="lu-icon" id="luIcon">⭐</div>
+  <div class="lu-kicker" id="luKicker">Level up!</div>
+  <div class="lu-text" id="luText"></div>
+  <div class="lu-sub" id="luSub"></div>
+  <button class="btn primary" id="luOk">Wonderful</button>
+</div>
 
 <aside id="roomSheet" class="sheet panel" aria-label="Room" aria-hidden="true">
   <header><h2 id="roomTitle">Room</h2><span class="ar" id="roomTitleAr" lang="ar"></span><button class="close" data-close="roomSheet" aria-label="Close">✕</button></header>
@@ -169,6 +202,7 @@ h4 { margin: 0; font-family: var(--font-display); font-size: 17px; }
 
 <script src="config.js"></script>
 <script src="data/agents.js"></script>
+<script src="data/progression.js"></script>
 <script src="data/state.js"></script>
 <script src="js/core.js"></script>
 <script src="js/art.js"></script>

@@ -322,6 +322,7 @@
       if (JSON.stringify(window.VILLAGE_STATE) === before) return;
       AG.setState(window.VILLAGE_STATE || {}, false);
       if (UI.openPlace) UI.renderRoom();
+      UI.checkLevelUps();
     };
     s.onerror = () => s.remove();
     document.body.appendChild(s);
@@ -343,6 +344,7 @@
     setInterval(() => V.sky.fetchWeather().then(() => V.audio.refresh()), 15 * 60e3);
     setInterval(poll, Math.max(15, V.cfg.statePollSeconds || 60) * 1000);
     UI.fromHash();
+    setTimeout(UI.checkLevelUps, 1200);
     requestAnimationFrame(loop);
   };
   (document.fonts && document.fonts.ready ? document.fonts.ready : Promise.resolve()).then(boot, boot);

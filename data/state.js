@@ -5,7 +5,8 @@ window.VILLAGE_STATE = {
     "ahmed":    { "status": "idle", "message": false, "tasksDone": 0 },
     "othman":   { "status": "idle", "message": false, "tasksDone": 0 },
     "mustafa":  { "status": "idle", "message": false, "tasksDone": 0 },
-    "muse":     { "status": "idle", "message": false, "tasksDone": 0 }
+    "muse":     { "status": "idle", "message": false, "tasksDone": 0 },
+    "saladin":  { "status": "idle", "message": false, "tasksDone": 0 }
   },
   "activity": []
 };

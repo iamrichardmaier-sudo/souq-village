@@ -39,16 +39,15 @@
 
   /* ---------- state helpers ---------- */
   AG.st = (id) => AG.state.agents?.[id] || {};
-  AG.bonus = (id) => (V.store.get("bonusHearts", {})[id] || 0);
-  AG.hearts = (id) => (AG.st(id).tasksDone || 0) + AG.bonus(id);
-  AG.level = (id) => 1 + Math.floor(AG.hearts(id) / 5);
+  AG.P = window.VILLAGE_PROGRESSION;
+  AG.player = () => AG.state.player || {};
+  AG.points = (id) => AG.player().friendship?.[id] || 0;
+  AG.hearts = (id) => AG.P.heartsFor(AG.points(id));
+  AG.skillOf = (id) => AG.P.skills.find((s) => s.agent === id);
+  AG.skillProgress = (skillId) => AG.P.progressFor(AG.player().skills?.[skillId] || 0);
   AG.msgKey = (id) => `${AG.state.updated || ""}|${AG.st(id).messageNote || ""}`;
   AG.hasMessage = (id) => !!AG.st(id).message && V.store.get("readMsgs", {})[id] !== AG.msgKey(id);
   AG.markRead = (id) => { const r = V.store.get("readMsgs", {}); r[id] = AG.msgKey(id); V.store.set("readMsgs", r); };
-  AG.giveHeart = (id) => {
-    const b = V.store.get("bonusHearts", {}); b[id] = (b[id] || 0) + 1; V.store.set("bonusHearts", b);
-    AG.checkHearts(false);
-  };
   AG.residents = (placeId) => AG.list.filter((a) => a.home.id === placeId);
   AG.activityFor = (id) => (AG.state.activity || []).filter((x) => x.from === id || x.to === id).slice(-8).reverse();
   AG.friends = (id) => new Set(AG.activityFor(id).map((x) => (x.from === id ? x.to : x.from)).filter((o) => o && o !== "you" && AG.byId[o])).size;
@@ -122,13 +121,8 @@
       if (seen[a.id] == null) seen[a.id] = h;
       else if (h > seen[a.id]) {
         const gained = h - seen[a.id];
-        const lvlUp = Math.floor(h / 5) > Math.floor(seen[a.id] / 5);
         seen[a.id] = h;
-        if (!first) {
-          AG.burst(a, gained);
-          V.ui && V.ui.toast(lvlUp ? `${a.data.name} reached level ${AG.level(a.id)}!` : `${a.data.name} earned ${gained > 1 ? gained + " hearts" : "a heart"}`);
-          V.audio.sfx("heart");
-        }
+        if (!first) { AG.burst(a, gained); V.audio.sfx("heart"); }
       }
     });
     V.store.set("seenHearts", seen);

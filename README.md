@@ -43,9 +43,9 @@ Every agent has an email alias on your one inbox: `you+muse@gmail.com`, `you+lay
 
 The agents run on **Claude Code as a scheduled task** using your Claude subscription. You don't need an API key and none is stored. Each run, Claude reads the new mail to the aliases through the Gmail connector, answers as each agent following `CLAUDE.md`, updates `data/state.js`, and pushes. The hosted page picks that up within a minute.
 
-### Hearts and levels
+### Skills, hearts and levels
 
-Every finished task is a heart (♥), and every 5 hearts is a level. You can also give a heart yourself from an agent's room; that one is saved only in your browser.
+The village works like Stardew Valley. What you do during the day earns XP in 6 skills, 15 levels each, and hearts with the person who specializes in it, 10 hearts each. The XP turns into levels at the end of the day, and your phone announces each level-up. See `CONNECTIONS.md` for where every number comes from, and 📜 in the village for your progress.
 
 ## Siri
 
