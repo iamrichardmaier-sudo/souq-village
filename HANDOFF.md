@@ -40,10 +40,7 @@ In `benarabic`, merge the branch `claude/festive-feynman-o0eq3d` into `main`. It
 ### 3. Put the village online (if not done yet)
 1. On Netlify, go to **Add new site → Import from GitHub** and pick `souq-village`.
 2. Leave the build command empty and set the publish directory to `.`. `netlify.toml` already sets both.
-3. Put the site address into these three places:
-   - `VILLAGE_URL` in `scriptable/SouqChat.js`
-   - `VILLAGE_URL` in `scriptable/LevelUpNotify.js`
-   - your phone's Scriptable copies of those two scripts.
+3. Put the site address into `VILLAGE_URL` in `scriptable/LevelUpNotify.js` and your phone's copy of it. The villager scripts ask for it the first time you open one.
 
 The site is public, but its address is hard to guess. Don't post the link.
 
@@ -91,7 +88,13 @@ Use the text in `HIGGSFIELD_PROMPTS.md` §7 so Muse emails school updates to `i.
 - **Characters on the map** are drawn at `V.personScale` (1.6) in `js/painted.js`. They walk on a 16-pixel grid traced from the painting.
 - **The owner's character:** `assets/avatar/` (idle, working, wave, walk, portrait), cut from `assets/source/sheet-you.jpg`. It was made from a selfie the owner shared in chat. The selfie itself is not in the repo.
 - **Pets:** 30 icons in `assets/pets/01–30.png`, listed in `data/pets.js` (tier 1 everyday, tier 2 desert, tier 3 legendary). Owned pets are `player.pets` (an array of numbers) in `data/state.js`; the 📜 panel shows them, with silhouettes for the rest. Cut sheets with `python3 -I tools/cut_grid.py sheet.png assets/pets <first number>`; the original sheets are `assets/source/pets1–3.jpg`.
-- **Phone chat** (`scriptable/SouqChat.js`, `PHONE.md`): texts go out as email with a `(widget)`, `(Siri)` or `(call notes)` subject. Replies go into `data/chat.json`. Calls open a Claude Project per villager whose instructions the script builds from `data/agents.js`. Test it without a phone by running the script in Node with stand-ins for Scriptable's `Request`, `FileManager`, `WebView` and friends.
+- **Phone chat** (`PHONE.md`):
+  - Each villager has a small script in `scriptable/villagers/`. It downloads `scriptable/SouqCore.js` from the site, which does the widget, the chat, the setup quest and Siri.
+  - **Quick replies:** the phone starts the **Souq village chat** scheduled task through its API trigger (token in the phone's Keychain, 20 a day). Its rules are in `CLAUDE.md` → Quick replies.
+  - **Otherwise** texts go out as email with a `(widget)`, `(Siri)` or `(call notes)` subject.
+  - **Replies** go into `data/chat.json`.
+  - **Setup quests** (the connections each villager asks for) are `quests()` in `SouqCore.js`.
+  - **Testing:** run the scripts in Node with stand-ins for Scriptable's `Request`, `FileManager`, `WebView`, `Keychain` and friends.
 - **Open items:**
   - Quests that give pets: a villager asks for something, and finishing it adds a pet number to `player.pets`. Showing pets inside the owner's house is also still to do.
   - AutoSprite walk cycles. Optional; a two-pose walk is used now.

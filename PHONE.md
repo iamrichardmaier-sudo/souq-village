@@ -1,20 +1,49 @@
 # Talking to the villagers from your phone
 
-Each villager gets a home-screen widget with their portrait. Tap it to text them, hear their replies out loud, or call them for a live voice chat in the Claude app. Siri can do the same hands-free. There are no API keys:
+Every villager gets their own home-screen widget, with their portrait as the picture. Tap it to text them, hear their replies out loud, or call them for a live voice chat in the Claude app. Siri can do the same hands-free.
 
-- **Texts** go out as email to the villager's alias (`you+ahmed@gmail.com`).
-- **Replies** come from the scheduled Claude run (12:20, 6:20 and 11:20). It answers in character and writes the reply into `data/chat.json`, which the widget reads from the village site.
-- **Calls** open that villager's Project in the Claude app, where you talk to them in voice mode right away.
+**The first time you open a villager, they give you a task:** the connections they need to do their job. Start with **Muhammad**, because nothing gets delivered until his part is done.
 
-Villager ids: `muhammad`, `ahmed`, `othman`, `mustafa`, `saladin`, `muse`.
+No API keys are involved:
+- **Quick replies.** Your text starts the **Souq village chat** Claude task, and the villager answers in a minute or two. You get 20 a day. It uses your Claude plan, not money.
+- **After 20,** or before quick replies are on, texts go out as email to the villager's alias (`you+ahmed@gmail.com`). The next village run answers them (12:20, 6:20 and 11:20).
+- **Calls** open that villager's Project in the Claude app for live voice.
 
-## 1. The script (Scriptable)
+## 1. The villager scripts (Scriptable)
 
 1. Install **Scriptable** from the App Store.
-2. New script, named exactly **Souq Chat**. Paste in `scriptable/SouqChat.js`.
-3. At the top, set `VILLAGE_URL` to the village's address (ends with `/`).
+2. For each villager, make a new script with exactly their name (**Muhammad**, **Ahmed**, **Othman**, **Mustafa**, **Saladin**, **Muse**), and paste in their file from `scriptable/villagers/`.
+3. Open **Muhammad** once. It asks for the village's address (the Netlify link, like `https://your-site.netlify.app/`). The other villagers remember it.
 
-## 2. The "Souq Send" Shortcut (sends your texts silently)
+The villager scripts download **Souq Core** from the village by themselves, and keep it up to date. You never edit it.
+
+## 2. The widgets
+
+Long-press the home screen → **+** → **Scriptable**, pick a size, then long-press the widget → **Edit Widget** → **Script:** the villager's name. Do this once per villager.
+
+| Size | What it shows | Tapping it |
+|---|---|---|
+| Small | Their portrait fills the widget, with their name, latest words, and a dot when there's something new | Opens the chat |
+| Medium | Portrait, hearts, their latest words, and **💬 Message** / **📞 Call** buttons | Each button does what it says |
+| Large | The same, plus the last few messages | Same |
+
+**In the chat:** type, or tap 🎤 on the keyboard to talk. **🔊 Listen** reads a reply in that villager's voice. **↻ Check** looks for replies. **📜 Setup** opens their task again.
+
+## 3. The setup tasks
+
+Each villager's task is a checklist. Every step has buttons that take you to the right place or copy what you need. Tap the circle when a step is done. Steps the phone can check, like quick replies and calls, tick themselves.
+
+| Villager | What they ask for |
+|---|---|
+| **Muhammad** | The **Souq Send** Shortcut (below), Gmail in Claude, quick replies, LinkedIn notifications |
+| **Othman** | The village's scheduled task (he copies the prompt for you), Google Calendar, level-up notifications |
+| **Ahmed** | The Arabic app's branch merged, and the **Arabic Flashcards** connector |
+| **Mustafa** | The **Log to Souq** Shortcut (`CONNECTIONS.md` step 3) |
+| **Saladin** | The **Souq Day Report** automation (`CONNECTIONS.md` step 2) and Health sharing for Park Destroyer |
+| **Muse** | Instructions for your Meta Muse (she copies them for you) |
+| **Everyone** | A call with them, and a Siri Shortcut |
+
+### The Souq Send Shortcut (sends your texts silently)
 
 In the Shortcuts app, make a new Shortcut named exactly **Souq Send**:
 
@@ -24,55 +53,42 @@ In the Shortcuts app, make a new Shortcut named exactly **Souq Send**:
 4. **Get Dictionary Value** for key `body` from the *Dictionary*. Rename it **Body**.
 5. **Send Email**: recipient *To*, subject *Subject*, message *Body*. Tap the arrow and turn **Show Compose Sheet** off.
 
-It sends from the iPhone Mail app's account, so your Gmail needs to be added in Mail (Settings → Apps → Mail → Mail Accounts).
+It sends from the iPhone Mail app, so your Gmail needs to be added there (Settings → Apps → Mail → Mail Accounts).
 
-The script opens this Shortcut, then comes straight back. If you'd rather tap Send on every text, set `SEND_WITH = "mail"` in the script.
+### Quick replies (Muhammad's step)
 
-## 3. The widgets
+1. In the chat, tap **Set up** on the step, then **Open tasks**. Open **Souq village chat** → **Edit** → **+** next to Trigger → **API**.
+2. Copy the **Fire URL**, come back, and tap **Paste**.
+3. Tap **Generate token**, copy it, come back, and tap **Paste** again. The token shows only once.
 
-For each villager: long-press the home screen → **+** → **Scriptable** and pick a size. Then long-press the widget → **Edit Widget**:
-- **Script:** Souq Chat
-- **Parameter:** the villager's id, like `ahmed`
+The token can only start that one task, and it stays in your phone's Keychain. The chat shows how many quick replies are left today.
 
-| Size | What it shows | Tapping it |
-|---|---|---|
-| Small | Portrait, hearts, their latest words, a dot when they wrote back | Opens the chat |
-| Medium | The last two messages, with **💬 Message** and **📞 Call** buttons | Each button does what it says |
-| Large | The last five messages and both buttons | Same |
+### Calls (everyone's step)
 
-**In the chat:** type, or tap 🎤 on the keyboard to talk. A message shows *Sent · waiting* until the next village run answers it. Tap **🔊 Listen** on a reply to hear it in that villager's voice. Tap **↻ Check for replies** to look for new ones.
+1. Tap **Set up**, then **Copy instructions**. Claude opens.
+2. Make a **new Project** named after the villager and paste into its instructions.
+3. Copy the project's link, come back, and tap **Save link**.
 
-## 4. Calls (once per villager)
+After that, **📞 Call** opens their project straight away. Tap the voice button in Claude to talk. When you say goodbye, they give you a recap that starts with "Call notes:". Copy it and tap **📋 Send call notes**, so the village remembers.
 
-The first time you tap **📞 Call**, the chat shows three steps:
-
-1. **Copy instructions.** This copies the villager's personality and opens Claude.
-2. In Claude, make a **new Project** named after them (Ahmed) and paste into its instructions.
-3. In the project, copy its link, come back to the chat and tap **Save link**.
-
-After that, **📞 Call** opens their project straight away. Tap the voice button in Claude to talk.
-
-At the end of a call, say goodbye. They'll give you a recap that starts with "Call notes:". Copy it and tap **📋 Send call notes** in their chat, so the village remembers.
-
-**Optional:** in the project, add `data/chat.json` and `library/` from GitHub under the project's files. Then they know what you've texted about and your school details.
-
-## 5. Siri
+### Siri
 
 Make one Shortcut per villager, named what you'll say, like **Talk to Ahmed**:
 
-1. **Run Script** (Scriptable): Script *Souq Chat*, Parameter `ahmed`. Turn **Run In App** off.
+1. **Run Script** (Scriptable): Script *Ahmed*. Turn **Run In App** off.
 2. **Speak Text**: *Script Result*. Tap the arrow to pick a different voice for each villager.
 3. **Dictate Text.**
 4. **Send Email**: To `i.am.richardmaier+ahmed@gmail.com`, Subject `Ahmed (Siri)`, Message *Dictated Text*. Turn **Show Compose Sheet** off.
 
-Say **"Hey Siri, Talk to Ahmed."** Siri reads whatever Ahmed has said since you last heard from him, then listens for your answer. Your Siri messages show up in the widget chat too.
+Say **"Hey Siri, Talk to Ahmed."** Siri reads what Ahmed has said since you last heard, then listens for your answer. Siri messages go by email, so they're answered at the next village run.
 
 **Home-screen icon with their face:**
-1. Open `VILLAGE_URL` + `assets/agents/ahmed/portrait.png` in Safari, long-press the image and Save to Photos.
+1. Open the village address + `assets/agents/ahmed/portrait.png` in Safari, long-press the image and Save to Photos.
 2. In Shortcuts, long-press **Talk to Ahmed** → Share → **Add to Home Screen**, tap the icon and choose that photo.
 
 ## Good to know
 
-- **Replies come at the next village run**, not instantly. Calls are the instant option. For faster texts, add more times to the scheduled task (see `HANDOFF.md` step 4). Each run uses some of your Claude plan.
-- **Privacy:** `data/chat.json` is on the village site, like `data/state.js`. Its address is hard to guess, but anyone with the link could read your chats. Don't share the link.
-- **Changing the voices:** `VOICES` at the top of the script sets each villager's speed, pitch and accent for 🔊 Listen.
+- **Quick replies aren't instant.** It takes a minute or two for the task to start and for the site to update. The chat shows "typing…" and checks every 15 seconds. If nothing comes after 6 minutes, tap **Send by email**.
+- **Your Claude plan:** each quick reply is a whole Claude run, so it uses more of your plan than a normal chat. The 20-a-day cap is `QUICK_PER_DAY` in `scriptable/SouqCore.js`.
+- **Privacy:** your chats are in `data/chat.json` on the village site. Its address is hard to guess, but anyone with the link could read them. Don't share the link.
+- **Voices:** `VOICES` in `scriptable/SouqCore.js` sets each villager's speed, pitch and accent for 🔊 Listen.

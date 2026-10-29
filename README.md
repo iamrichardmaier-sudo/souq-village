@@ -51,7 +51,7 @@ The village works like Stardew Valley. What you do during the day earns XP in 6 
 
 ## Phone: widgets, Siri and calls
 
-Each villager can have a home-screen widget with their portrait. You text them there, hear their replies out loud, and tap **📞 Call** to talk to them live in the Claude app. Siri works too: *"Hey Siri, Talk to Ahmed."* No API keys are needed. Setup is in `PHONE.md`, and the script is `scriptable/SouqChat.js`.
+Each villager has their own home-screen widget with their portrait. Text them there, and they answer in a minute or two (20 quick replies a day, then by email at the next run). Hear replies out loud, or tap **📞 Call** to talk live in the Claude app. Siri works too: *"Hey Siri, Talk to Ahmed."* No API keys are needed. The first time you open a villager, they ask you to set up the connections they need. Setup is in `PHONE.md`; the scripts are in `scriptable/villagers/`, and they share `scriptable/SouqCore.js`.
 
 ## Sound
 
