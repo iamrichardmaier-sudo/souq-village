@@ -14,6 +14,7 @@ This repo is a village of AI agents. The page (`index.html`) only shows them. Th
    - Do what was asked if it fits the agent's job. If it doesn't fit, say who in the village it does fit.
    - Answer the owner in the same thread (the Gmail connector's `reply`), signed as the agent. If sending ever fails, leave a draft instead and set that agent's `messageNote` to "Reply waiting in your drafts".
    - **Agent to agent:** if the subject names another agent ("Omar: can you check…"), that agent takes a turn too. Write their answer in the thread, add an `activity` entry `{ from, to, subject }` for each hop, and stop after 3 hops.
+   - **Chat from the phone.** A subject ending in `(widget)`, `(Siri)` or `(call notes)` came from the owner's phone (`scriptable/SouqChat.js`). The agent answers it like a text from a friend: a few sentences, no headings or lists, in their voice. `(call notes)` is a recap of a voice call the owner had with that agent in the Claude app: act on anything it asks for, keep what's worth remembering, and answer with a one-line acknowledgement. These count as mail from the owner even when sent to `+muse`.
    - **Muse is special.** Mail to `+muse` usually comes from the owner's Meta Muse assistant with things it pulled from school websites. File it under `library/` as dated Markdown, one file per course (`library/<course>.md`). Don't answer it. Set Muse's `message: true` with a short `messageNote` ("3 new due dates"). Other agents read `library/` when they need school facts.
 4. **Update `data/state.js`** (keep it the same shape, strict JSON after `window.VILLAGE_STATE =`):
    - `status`: `"working"` while an agent has unfinished work, otherwise `"idle"`.
@@ -22,7 +23,13 @@ This repo is a village of AI agents. The page (`index.html`) only shows them. Th
    - `tasksDone`: add 1 for each finished request. (Hearts and levels come from `player`, below, not from this.)
    - `activity`: append mail events (owner = `"you"`). Keep the last 200.
    - `updated`: now, ISO time.
-5. **Save** `lastRun` in `data/brain.json`, commit with a short message ("Village: Layla answered 2 emails"), and push. The hosted page picks up the new state within a minute.
+5. **Update `data/chat.json`** (plain JSON). It is what the phone widgets show. For every agent, `threads.<id>` is the conversation, oldest first:
+   `{ "from": "you" | "<agent id>", "text": "…", "at": "<ISO time>", "via": "widget" | "Siri" | "call notes" | "email" }`.
+   - Add the owner's message (`from: "you"`, the message text exactly as sent, `at` = the email's time) and the agent's answer (`at` = now). Do this for email conversations too, not only phone chat.
+   - When Muse files school mail, add one line from Muse ("Filed 3 new due dates for BUS 201"), not the mail itself.
+   - Agent-to-agent hops stay in email and `activity`, not in `chat.json`.
+   - Keep the last 40 messages per agent. Set `updated` to now.
+6. **Save** `lastRun` in `data/brain.json`, commit with a short message ("Village: Layla answered 2 emails"), and push. The hosted page picks up the new state within a minute.
 
 ## Skills and friendship (every run)
 
@@ -42,7 +49,7 @@ You gather numbers; `tools/daily.mjs` does all the arithmetic. Never edit `playe
    - `weekly_review`: 1 when the owner and Othman finish the weekly plan thread.
 3. **Record:** `node tools/daily.mjs record --date <today> --counts '<json>'`. If the date changed since the last run, it closes the previous day by itself.
 4. **On the last run of the day** (after 11:15 PM), run `node tools/daily.mjs close`. It writes level-ups to `player.levelUps`. The village shows them, and the owner's phone announces them.
-5. Commit `data/state.js` with the rest. In the commit message, mention any level-ups ("Village: Arabic reached level 3").
+5. Commit `data/state.js` and `data/chat.json` with the rest. In the commit message, mention any level-ups ("Village: Arabic reached level 3").
 
 ## Rules
 

@@ -23,6 +23,8 @@ Handy for testing: `?hour=21` forces the time to 9 pm, and `?weather=rain` (also
 | `config.js` | Your email, WhatsApp number, location fallback, your character, library links, sound files |
 | `data/agents.js` | The agents: name, house, job, personality, look, who's married |
 | `data/state.js` | What each agent is doing right now. The Claude task rewrites this. |
+| `PHONE.md` | Setting up the phone widgets, Siri and calls |
+| `data/chat.json` | The conversations the phone widgets show. The Claude task writes it. |
 | `CLAUDE.md` | The instructions the agents follow when Claude runs them |
 | `ART_PROMPTS.md` | Gemini prompts and exact filenames for characters and rooms |
 | `js/painted.js` | Where people can walk on the painting, and where each door and lantern is |
@@ -47,17 +49,9 @@ The agents run on **Claude Code as a scheduled task** using your Claude subscrip
 
 The village works like Stardew Valley. What you do during the day earns XP in 6 skills, 15 levels each, and hearts with the person who specializes in it, 10 hearts each. The XP turns into levels at the end of the day, and your phone announces each level-up. See `CONNECTIONS.md` for where every number comes from, and 📜 in the village for your progress.
 
-## Siri
+## Phone: widgets, Siri and calls
 
-Make one Shortcut per agent in the Shortcuts app:
-
-1. New Shortcut, named exactly what you'll say, e.g. **Tell Layla**.
-2. Add **Dictate Text**.
-3. Add **Send Email**: To `you+layla@gmail.com`, Subject *Dictated Text*, turn **Show Compose Sheet** off.
-
-Say "Hey Siri, Tell Layla," then say the message when Siri asks. To have agents talk to each other, just say the other name: *"Ask Omar to plan Saturday."* The name ends up in the subject.
-
-**Home-screen icons:** use `scriptable/AgentWidget.js` in the Scriptable app, one small widget per agent (Parameter = their id). It shows their status, the **!**, and their hearts, and tapping it opens their room. You can also add each Siri Shortcut to the home screen with the agent's Gemini portrait as its icon.
+Each villager can have a home-screen widget with their portrait. You text them there, hear their replies out loud, and tap **📞 Call** to talk to them live in the Claude app. Siri works too: *"Hey Siri, Talk to Ahmed."* No API keys are needed. Setup is in `PHONE.md`, and the script is `scriptable/SouqChat.js`.
 
 ## Sound
 
