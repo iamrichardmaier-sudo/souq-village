@@ -134,7 +134,7 @@
   };
 
   W.assetKeys = () => {
-    const keys = new Set(["avatar/idle", "avatar/working"]);
+    const keys = new Set(["avatar/idle", "avatar/working", "avatar/walk", "avatar/wave"]);
     W.objects.forEach((o) => { o.art && keys.add(o.art); o.artOwn && keys.add(o.artOwn); });
     W.places.forEach((p) => keys.add("rooms/" + p.id));
     ["rooms/house"].forEach((k) => keys.add(k));

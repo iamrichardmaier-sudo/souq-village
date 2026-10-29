@@ -162,7 +162,7 @@
     W.lights = lanterns.map(([x, y]) => ({ x, y, r: 70, kind: "lantern" }));
   };
   W.assetKeys = () => {
-    const keys = new Set(["avatar/idle", "avatar/working", "rooms/house"]);
+    const keys = new Set(["avatar/idle", "avatar/working", "avatar/walk", "avatar/wave", "rooms/house"]);
     W.places.forEach((p) => keys.add("rooms/" + p.id));
     (window.VILLAGE_AGENTS || []).forEach((a) => ["idle", "working", "walk", "wave", "portrait"].forEach((s) => keys.add("agents/" + a.id + "/" + s)));
     return [...keys];

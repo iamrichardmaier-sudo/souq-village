@@ -89,10 +89,10 @@ Use the text in `HIGGSFIELD_PROMPTS.md` §7 so Muse emails school updates to `i.
   - For map edits, name each building by position ("LOWER LEFT OF CENTER…") and list what must NOT change. The first vague attempt changed the wrong buildings.
   - New map versions must keep the exact layout (2000×1116 when saved). The streets in `js/painted.js` are traced to those pixels. Check alignment before using a new map.
 - **Characters on the map** are drawn at `V.personScale` (1.6) in `js/painted.js`. They walk on a 16-pixel grid traced from the painting.
+- **The owner's character:** `assets/avatar/` (idle, working, wave, walk, portrait), cut from `assets/source/sheet-you.jpg`. It was made from a selfie the owner shared in chat. The selfie itself is not in the repo.
 - **Pets:** 30 icons in `assets/pets/01–30.png`, listed in `data/pets.js` (tier 1 everyday, tier 2 desert, tier 3 legendary). Owned pets are `player.pets` (an array of numbers) in `data/state.js`; the 📜 panel shows them, with silhouettes for the rest. Cut sheets with `python3 -I tools/cut_grid.py sheet.png assets/pets <first number>`; the original sheets are `assets/source/pets1–3.jpg`.
 - **Open items:**
   - Quests that give pets: a villager asks for something, and finishing it adds a pet number to `player.pets`. Showing pets inside the owner's house is also still to do.
-  - The owner's own character sheet. They need to describe themselves first.
   - AutoSprite walk cycles. Optional; a two-pose walk is used now.
   - LinkedIn sent-message counts. LinkedIn offers no feed, so they're logged by hand with Log to Souq.
   - Some edge houses (the left side and the laundry house) aren't reachable on the walk grid yet.
