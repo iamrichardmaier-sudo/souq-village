@@ -11,7 +11,7 @@ const AGENT = "ahmed";
 
 const here = module.filename;
 const fm = here.includes("Mobile Documents") ? FileManager.iCloud() : FileManager.local();
-const corePath = fm.joinPath(fm.directory(here), "Souq Core.js");
+const corePath = fm.joinPath(here.substring(0, here.lastIndexOf("/")), "Souq Core.js");
 
 if (!Keychain.contains("souq.villageURL")) {
   if (config.runsInWidget) {
