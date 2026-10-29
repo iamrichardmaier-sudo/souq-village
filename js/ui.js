@@ -62,7 +62,7 @@
   };
 
   UI.placeTitle = (p) => {
-    if (p.kind !== "house") return p.name;
+    if (p.kind !== "house" || p.named) return p.name;
     const r = AG.residents(p.id);
     if (!r.length) return "Empty house";
     return (r.length === 2 && r[0].data.spouse === r[1].id ? `${r[0].data.name} & ${r[1].data.name}'s house` : r.map((a) => a.data.name).join(", ") + (r.length > 1 ? "'s house" : "'s house"));

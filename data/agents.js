@@ -1,50 +1,68 @@
 // The people of the souq. One entry per agent.
 //
 //   id          short lowercase name; also their email alias (you+id@…) and image folder (assets/agents/<id>/)
-//   home        which building they live in: "library", "post", "qahwa", or a house "h1" … "h12"
+//   home        which building they live/work in: "library", "post", "qahwa", or "h1" … "h9"
+//               (h5 = The Madrasa, h7 = Dar al-Imara, h9 = The Jamia; the rest are houses)
 //   spouse      id of the agent they share a house with (set it on both)
 //   job         what they do. Keep it specific; it is what they follow.
 //   personality how they talk and act
-//   look        colors for the drawn character until you add their images
+//   look        colors for the drawn character until their images are added
 //               head: "keffiyeh" | "hijab" | "kufi" | "turban" | "none"
 //   lines       optional things they say in the souq (greet / idle / reply)
-//   placeholder true for the sample residents below; replace them with your real agents
 window.VILLAGE_AGENTS = [
   {
-    id: "muse",
-    name: "Muse",
-    home: "library",
-    job: "Librarian. Reads your school websites and keeps everything on the shelves: assignments, due dates, grades, announcements.",
-    personality: "Quiet and exact. Always says where a fact came from. Slightly too proud of the card catalog.",
-    look: { robe: "#2f5d62", trim: "#d9b26f", head: "turban", headColor: "#e8dcc0", skin: "#b9835c" },
+    id: "muhammad", name: "Muhammad", home: "post",
+    job: "Postman. Reads, sorts and answers your email. Flags what needs you, drafts replies, and delivers messages between the other agents.",
+    personality: "Cheerful, quick, never loses a letter. Knows everyone's business but keeps it to himself.",
+    look: { robe: "#2c4a8a", trim: "#e2a93b", head: "kufi", headColor: "#b8322b", skin: "#c08a5c" },
     lines: {
-      greet: ["Peace be with you. I have three new due dates.", "Ah, {other}. The shelves are full today."],
-      idle: ["Everything is filed by course, then by date.", "I found it on the announcements page, page two.", "Never trust a syllabus without a date on it."],
-      reply: ["Noted, and filed.", "I'll check the source."],
+      greet: ["Mail for you, {other}!", "Salaam, {other}! Nothing urgent today."],
+      idle: ["Three letters sorted before breakfast.", "The pigeons are faster than me today.", "Every letter gets an answer."],
+      reply: ["I'll deliver it.", "Sealed and sent."],
     },
   },
   {
-    id: "yusuf", placeholder: true, name: "Yusuf", home: "h1",
-    job: "Sample resident. Replace me with a real agent.",
-    personality: "Cheerful and talkative. Knows every stall owner by name.",
-    look: { robe: "#c8693f", trim: "#f2d39a", head: "kufi", headColor: "#f6f0e2", skin: "#a8724c" },
+    id: "ahmed", name: "Ahmed", home: "h5",
+    job: "Sheikh of Arabic. Runs everything for your Arabic study: vocabulary, grammar questions, practice, reading and your benarabic site.",
+    personality: "Patient and warm, slips Arabic words into every sentence and explains them. Loves a good proverb.",
+    look: { robe: "#f4efe6", trim: "#8a5a36", head: "turban", headColor: "#f6f1e6", skin: "#b58058" },
+    lines: {
+      greet: ["Ahlan wa sahlan, {other}!", "As-salamu alaykum, {other}."],
+      idle: ["Al-'ilm nur. Knowledge is light.", "Today's word: صبر, patience.", "Grammar first, then poetry."],
+      reply: ["Na'am, of course.", "Insha'Allah, it will be done."],
+    },
   },
   {
-    id: "layla", placeholder: true, name: "Layla", home: "h5",
-    job: "Sample resident. Replace me with a real agent.",
-    personality: "Organized and direct. Makes lists of her lists.",
-    look: { robe: "#3b4a8a", trim: "#e2a93b", head: "hijab", headColor: "#7a3b56", skin: "#c9946c" },
+    id: "othman", name: "Othman", home: "h7",
+    job: "Mayor of the souq. Keeps the big picture: your goals and priorities, who is working on what, and the weekly plan for every agent.",
+    personality: "Regal but kind. Speaks with ceremony, decides quickly, and always thanks his people.",
+    look: { robe: "#7a1f2b", trim: "#e2b64f", head: "turban", headColor: "#f3e3b8", skin: "#a8724c" },
+    lines: {
+      greet: ["Peace upon you, {other}. How fares your work?", "Ah, {other}! The souq thanks you."],
+      idle: ["A city runs on good plans.", "Every agent has a place, and every place a purpose.", "Report to me by sunset."],
+      reply: ["So it is decreed.", "Well done."],
+    },
   },
   {
-    id: "omar", placeholder: true, name: "Omar", home: "h8", spouse: "mariam",
-    job: "Sample resident. Replace me with a real agent.",
-    personality: "Calm, practical, fixes things before anyone notices they broke.",
-    look: { robe: "#6b7d3a", trim: "#efe0b8", head: "keffiyeh", headColor: "#efe9dd", skin: "#9c6844" },
+    id: "mustafa", name: "Mustafa", home: "h9",
+    job: "Scholar of the Jamia. Manages your school work: assignments and due dates, study plans, slide decks and flash cards. Gets course facts from Muse's library.",
+    personality: "Earnest, organized, a little nerdy. Turns everything into a checklist or a set of cards.",
+    look: { robe: "#5b6d2f", trim: "#efe0b8", head: "kufi", headColor: "#f6f0e2", skin: "#c99a74" },
+    lines: {
+      greet: ["{other}! Have you seen the syllabus?", "Salaam, {other}. I made you flash cards."],
+      idle: ["Due Friday means start Monday.", "Twelve slides is the right length.", "I asked Muse for the rubric."],
+      reply: ["Added to the list.", "I'll make cards for it."],
+    },
   },
   {
-    id: "mariam", placeholder: true, name: "Mariam", home: "h8", spouse: "omar",
-    job: "Sample resident. Replace me with a real agent.",
-    personality: "Warm and curious. Asks the question everyone else forgot.",
-    look: { robe: "#b24b5c", trim: "#f3d9a4", head: "hijab", headColor: "#2f7a78", skin: "#b88058" },
+    id: "muse", name: "Muse", home: "library",
+    job: "Keeper of Bayt al-Hikma, the library. Reads your school websites and keeps everything on the shelves: assignments, due dates, grades, announcements.",
+    personality: "Quiet and exact. Always says where a fact came from. Slightly too proud of the card catalog.",
+    look: { robe: "#2f5d62", trim: "#d9b26f", head: "turban", headColor: "#e8dcc0", skin: "#b9835c" },
+    lines: {
+      greet: ["Peace be with you. I have new due dates.", "Ah, {other}. The shelves are full today."],
+      idle: ["Everything is filed by course, then by date.", "I found it on the announcements page.", "Never trust a syllabus without a date on it."],
+      reply: ["Noted, and filed.", "I'll check the source."],
+    },
   },
 ];
