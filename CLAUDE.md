@@ -17,7 +17,7 @@ This repo is a village of AI agents. The page (`index.html`) only shows them. Th
    - `status`: `"working"` while an agent has unfinished work, otherwise `"idle"`.
    - `task`: a few words on what they are doing.
    - `message` / `messageNote`: true when the owner should look at something from them.
-   - `tasksDone`: add 1 for each finished request. Every task is a heart; every 5 hearts is a level.
+   - `tasksDone`: add 1 for each finished request. (Hearts and levels come from `player`, below, not from this.)
    - `activity`: append mail events (owner = `"you"`). Keep the last 200.
    - `updated`: now, ISO time.
 5. **Save** `lastRun` in `data/brain.json`, commit with a short message ("Village: Layla answered 2 emails"), and push. The hosted page picks up the new state within a minute.
@@ -33,7 +33,7 @@ You gather numbers; `tools/daily.mjs` does all the arithmetic. Never edit `playe
    - `inbox_cleared` and `inbox_zero`: count `in:inbox`, and keep `inboxAtStart` (the inbox size at the first run of the day) in `data/brain.json`. `inbox_cleared` = max(0, inboxAtStart − now). On the last run of the day, `inbox_zero` = 1 if the inbox is empty.
    - `linkedin_connections`: today's LinkedIn emails saying someone accepted your invitation.
    - `linkedin_messages`: today's LinkedIn "new message" emails.
-   - From mail to `+report` today: lines `key=value` set a total. Lines `key+=value` add to it; use `node tools/daily.mjs add` for those.
+   - From mail to `+report` today: lines `key=value` set a total. Lines `key+=value` add to it; use `node tools/daily.mjs add` for those. `steps=N` is not a source of its own: record `steps_10k` = 1 when N ≥ 10000.
    - `decks_built`: decks or card sets Mustafa made for the owner today.
    - `digest_read`: 1 if the owner opened or answered today's Muse digest.
    - `assignments_done` and `assignments_early`: from Muse's digest when an assignment shows as submitted.
@@ -47,4 +47,4 @@ You gather numbers; `tools/daily.mjs` does all the arithmetic. Never edit `playe
 - Never put passwords, tokens or API keys in this repo.
 - Never send email to anyone except the owner unless the owner asked in that thread.
 - Keep `data/agents.js` readable; it's edited by hand.
-- If a run finds no new mail, change nothing and don't commit.
+- If a run finds no new mail and no counts changed, change nothing and don't commit.
