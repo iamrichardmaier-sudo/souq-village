@@ -1,5 +1,7 @@
 # Higgsfield prompt pack
 
+> These prompts have all been run (Oct 29, 2026), and the results are in `assets/`. Before making more, read "What worked with Higgsfield" in `HANDOFF.md`: new characters come out cleanest with only `assets/source/sheet-muhammad.jpg` attached, not the map.
+
 Model: **Nano Banana Pro** for everything except the walk cycles (**AutoSprite**).
 Always attach `assets/map/souq.jpg` (or the newer map from step 1) as the reference image.
 Generate in the order below. Later steps use earlier results as references.
