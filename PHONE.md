@@ -5,9 +5,11 @@ Every villager gets their own home-screen widget, with their portrait as the pic
 **The first time you open a villager, they give you a task:** the connections they need to do their job. Start with **Muhammad**, because nothing gets delivered until his part is done.
 
 No API keys are involved:
-- **Quick replies.** Your text starts the **Souq village chat** Claude task, and the villager answers in a minute or two. You get 20 a day. It uses your Claude plan, not money.
+- **Quick replies.** Your text goes straight to the AI (today the **Souq village chat** Claude task), and the villager answers in a minute or two. You get 20 a day. It uses your Claude plan, not money.
 - **After 20,** or before quick replies are on, texts go out as email to the villager's alias (`you+ahmed@gmail.com`). The next village run answers them (12:20, 6:20 and 11:20).
-- **Calls** open that villager's Project in the Claude app for live voice.
+- **Calls** open that villager's assistant in your AI's app (a Claude Project today) for live voice.
+
+To move all of this to another AI, see `SWITCHING.md`.
 
 ## 1. The villager scripts (Scriptable)
 
@@ -57,9 +59,10 @@ It sends from the iPhone Mail app, so your Gmail needs to be added there (Settin
 
 ### Quick replies (Muhammad's step)
 
-1. In the chat, tap **Set up** on the step, then **Open tasks**. Open **Souq village chat** → **Edit** → **+** next to Trigger → **API**.
-2. Copy the **Fire URL**, come back, and tap **Paste**.
-3. Tap **Generate token**, copy it, come back, and tap **Paste** again. The token shows only once.
+1. In the chat, tap **Set up** on the step, then **Open**. Open **Souq village chat** → **Edit**. Add the **souq-village** repository, so the task can save replies.
+2. Still in Edit, tap **+** next to Trigger → **API**.
+3. Copy the **Fire URL**, come back, and tap **Paste**.
+4. Tap **Generate token**, copy it, come back, and tap **Paste** again. The token shows only once.
 
 The token can only start that one task, and it stays in your phone's Keychain. The chat shows how many quick replies are left today.
 

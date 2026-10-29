@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// The end-of-day engine. The scheduled Claude task gathers today's numbers and
+// The end-of-day engine. The scheduled AI run gathers today's numbers and
 // calls this, so all the arithmetic is done here, the same way every time.
 //
 //   node tools/daily.mjs record --date 2026-10-29 --counts '{"arabic_app_xp": 640, "emails_sent": 9}'

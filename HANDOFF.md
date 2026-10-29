@@ -1,6 +1,6 @@
 # Handoff: carrying Souq al-Qamar to a new Claude account
 
-Everything the village needs is in this repo. Nothing important lives only in the old Claude account. Hand this file to the new account's Claude, or tell it: **"Read HANDOFF.md in souq-village and carry on."**
+Everything the village needs is in this repo. Nothing important lives only in the old Claude account. To move to a different AI entirely, use `SWITCHING.md` instead. Hand this file to the new account's Claude, or tell it: **"Read HANDOFF.md in souq-village and carry on."**
 
 ## What this is
 
@@ -17,7 +17,7 @@ Everything the village needs is in this repo. Nothing important lives only in th
   | Muse | Librarian, school data from the owner's Meta Muse assistant | Library |
 
   Houses h1, h2, h4, h6 and h8 and the coffee house are free for the 3–4 agents still to come; there are ideas in `CONNECTIONS.md`.
-- **The brain**: the agents are Claude itself, running as a **scheduled Claude Code task** on the owner's subscription. The instructions are in `CLAUDE.md`. The owner talks to agents by emailing `i.am.richardmaier+<agent id>@gmail.com`. Putting another agent's name in the subject makes them talk to each other.
+- **The brain**: the agents are Claude itself, running as a **scheduled Claude Code task** on the owner's subscription. The instructions are in `AGENTS.md`, written for any AI; `CLAUDE.md` points Claude to it. The owner talks to agents by emailing `i.am.richardmaier+<agent id>@gmail.com`. Putting another agent's name in the subject makes them talk to each other.
 - **Progression** (Stardew-style):
   - The rules are in `data/progression.js` and the end-of-day math in `tools/daily.mjs`.
   - Six skills with 15 levels each, and 10 hearts per agent.
@@ -51,7 +51,7 @@ In a Claude Code session on the new account with `souq-village` open, say:
 
 **Prompt for the scheduled task:**
 ```
-You are the agents of Souq al-Qamar. Follow CLAUDE.md in this repo exactly:
+You are the agents of Souq al-Qamar. Follow AGENTS.md in this repo exactly:
 answer new mail to the agent aliases as the right agent, update agent statuses,
 gather today's skill counts and record them with tools/daily.mjs, and if it is
 after 11:15 PM America/Denver, close the day with `node tools/daily.mjs close`.
@@ -90,7 +90,7 @@ Use the text in `HIGGSFIELD_PROMPTS.md` §7 so Muse emails school updates to `i.
 - **Pets:** 30 icons in `assets/pets/01–30.png`, listed in `data/pets.js` (tier 1 everyday, tier 2 desert, tier 3 legendary). Owned pets are `player.pets` (an array of numbers) in `data/state.js`; the 📜 panel shows them, with silhouettes for the rest. Cut sheets with `python3 -I tools/cut_grid.py sheet.png assets/pets <first number>`; the original sheets are `assets/source/pets1–3.jpg`.
 - **Phone chat** (`PHONE.md`):
   - Each villager has a small script in `scriptable/villagers/`. It downloads `scriptable/SouqCore.js` from the site, which does the widget, the chat, the setup quest and Siri.
-  - **Quick replies:** the phone starts the **Souq village chat** scheduled task through its API trigger (token in the phone's Keychain, 20 a day). Its rules are in `CLAUDE.md` → Quick replies.
+  - **Quick replies:** the phone starts the **Souq village chat** scheduled task through its API trigger (token in the phone's Keychain, 20 a day). Its rules are in `AGENTS.md` → Quick replies. Any AI can take this over (`SWITCHING.md`): the phone posts `{ agent, text, via, at }` to whatever address is saved.
   - **Otherwise** texts go out as email with a `(widget)`, `(Siri)` or `(call notes)` subject.
   - **Replies** go into `data/chat.json`.
   - **Setup quests** (the connections each villager asks for) are `quests()` in `SouqCore.js`.

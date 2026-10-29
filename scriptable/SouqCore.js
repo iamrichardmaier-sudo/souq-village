@@ -7,15 +7,19 @@
 // What it does, for one villager:
 //   • Widget: their portrait, their latest words, a dot when they wrote back.
 //   • Chat: read the conversation, type or dictate, hear replies, call them.
-//   • Quick replies: starts the "Souq village chat" Claude task so they answer
-//     in a minute or two (20 a day). After that, messages go by email and wait
+//   • Quick replies: sends the message to the AI's quick-reply address so they
+//     answer in a minute or two (20 a day). After that, messages go by email and wait
 //     for the next village run.
 //   • Setup quest: until you've made the connections they need, their first
 //     message is a checklist of what to set up.
 //   • Siri: a "Talk to <villager>" Shortcut runs their script to hear replies.
 //
-// No API keys. The quick-reply token can only start that one Claude task, and
-// it stays in your phone's Keychain.
+// No API keys. The quick-reply token (if your AI needs one) stays in your
+// phone's Keychain.
+//
+// Nothing here is tied to one AI. Its name and links come from "brain" in the
+// village's config.js; the quick-reply address is whatever you paste in.
+// See SWITCHING.md.
 
 const SEND_SHORTCUT = "Souq Send";
 const RUN_TIMES = "12:20, 6:20 and 11:20";
@@ -36,7 +40,7 @@ const VOICES = {
 
 /* ---------- setup quests: the connections each villager needs ---------- */
 
-const VILLAGE_TASK_PROMPT = `You are the agents of Souq al-Qamar. Follow CLAUDE.md in this repo exactly:
+const VILLAGE_TASK_PROMPT = `You are the agents of Souq al-Qamar. Follow AGENTS.md in this repo exactly:
 answer new mail to the agent aliases as the right agent, update agent statuses,
 gather today's skill counts and record them with tools/daily.mjs, and if it is
 after 11:15 PM America/Denver, close the day with \`node tools/daily.mjs close\`.
@@ -48,10 +52,11 @@ const MUSE_PROMPT = (alias) => `You are Muse, keeper of Bayt al-Hikma, the libra
 // Each step: id, what to do, and buttons. auto() marks a step done by itself.
 // Muhammad comes first: nothing reaches anyone until his steps are done.
 function quests(ctx) {
+  const B = ctx.brain;
   const guide = (anchor) => ({ label: "How", open: REPO + "PHONE.md#" + anchor });
   const setupGuide = (anchor) => ({ label: "How", open: REPO + "CONNECTIONS.md#" + anchor });
   const common = (name) => [
-    { id: "call", text: "Set up a call with me in the Claude app.", auto: () => !!ctx.projectLink(), buttons: [{ label: "Set up", action: "callsetup" }] },
+    { id: "call", text: "Set up a call with me in " + B.app + ".", auto: () => !!ctx.projectLink(), buttons: [{ label: "Set up", action: "callsetup" }] },
     { id: "siri", text: `Make a "Talk to ${name}" Shortcut for Siri.`, buttons: [guide("siri"), { label: "Open Shortcuts", open: "shortcuts://create-shortcut" }] },
   ];
   return {
@@ -59,7 +64,7 @@ function quests(ctx) {
       intro: "Salaam! Before I can carry a single letter for you, the post needs a road. Three things, and I'll be the fastest postman in the souq.",
       steps: [
         { id: "send", text: `Make the "${SEND_SHORTCUT}" Shortcut, so your messages reach us.`, buttons: [guide("the-souq-send-shortcut-sends-your-texts-silently"), { label: "Open Shortcuts", open: "shortcuts://create-shortcut" }] },
-        { id: "gmail", text: "Connect Gmail in Claude, so I can read and answer your mail.", buttons: [{ label: "Connectors", open: "https://claude.ai/settings/connectors" }] },
+        { id: "gmail", text: "Connect Gmail in " + B.name + ", so I can read and answer your mail.", buttons: [{ label: "Connect", open: B.connectors }] },
         { id: "quick", text: "Turn on quick replies, so we answer in a minute instead of at the next run.", auto: () => ctx.quickReady(), buttons: [{ label: "Set up", action: "quicksetup" }] },
         { id: "linkedin", text: "In LinkedIn, turn on email notifications for accepted invitations, so I can count your new connections.", buttons: [setupGuide("who-gives-what")] },
       ].concat(common("Muhammad")),
@@ -67,8 +72,8 @@ function quests(ctx) {
     othman: {
       intro: "Peace upon you. A souq without a schedule is only a crowd. Give the village its hours, and I will keep every villager to them.",
       steps: [
-        { id: "runs", text: `Create the "Souq al-Qamar agents" scheduled task (runs at ${RUN_TIMES}). Copy the prompt, then make a new task with this repo and the Gmail, Google Calendar and Arabic Flashcards connectors.`, buttons: [{ label: "Copy prompt", copy: VILLAGE_TASK_PROMPT }, { label: "Open tasks", open: "https://claude.ai/code/routines" }] },
-        { id: "calendar", text: "Optional: connect Google Calendar in Claude, so I can see your planned blocks.", buttons: [{ label: "Connectors", open: "https://claude.ai/settings/connectors" }] },
+        { id: "runs", text: `Give the village its hours: a scheduled run in ${B.name} at ${RUN_TIMES}, with this repo, Gmail, Google Calendar and Arabic Flashcards. Copy the prompt for it.`, buttons: [{ label: "Copy prompt", copy: VILLAGE_TASK_PROMPT }, { label: "Open", open: B.scheduledRuns }] },
+        { id: "calendar", text: "Optional: connect Google Calendar in " + B.name + ", so I can see your planned blocks.", buttons: [{ label: "Connect", open: B.connectors }] },
         { id: "levelups", text: "Set up level-up notifications, so the whole souq celebrates with you.", buttons: [setupGuide("4-level-up-notifications")] },
       ].concat(common("Othman")),
     },
@@ -76,7 +81,7 @@ function quests(ctx) {
       intro: "Ahlan wa sahlan! Al-'ilm nur, knowledge is light. But I cannot see your studies yet. Open the door from your Arabic app to me, insha'Allah.",
       steps: [
         { id: "merge", text: "Merge the Arabic app branch that lets me read your study XP.", buttons: [{ label: "Open on GitHub", open: "https://github.com/iamrichardmaier-sudo/benarabic/compare/main...claude/festive-feynman-o0eq3d" }] },
-        { id: "arabic", text: 'Add a custom connector in Claude named "Arabic Flashcards" with this URL, and sign in with your Arabic app account.', buttons: [{ label: "Copy URL", copy: "https://fphpcfecgnfoogfaeihu.supabase.co/functions/v1/mcp" }, { label: "Connectors", open: "https://claude.ai/settings/connectors" }] },
+        { id: "arabic", text: "Add a custom connector (MCP server) in " + B.name + ' named "Arabic Flashcards" with this URL, and sign in with your Arabic app account.', buttons: [{ label: "Copy URL", copy: "https://fphpcfecgnfoogfaeihu.supabase.co/functions/v1/mcp" }, { label: "Connect", open: B.connectors }] },
       ].concat(common("Ahmed")),
     },
     mustafa: {
@@ -120,7 +125,8 @@ module.exports.run = async function run({ agent: agentId }) {
   // seen: last reply you looked at. heard: last reply Siri read you.
   // pending: sent messages the village hasn't answered yet. projects: Call links.
   // quests: setup steps you ticked. quick: today's quick-reply count.
-  const local = Object.assign({ seen: {}, heard: {}, pending: {}, projects: {}, quests: {}, quick: {} }, readJSON("local.json", {}));
+  // replies: answers an AI gave straight back, until data/chat.json has them.
+  const local = Object.assign({ seen: {}, heard: {}, pending: {}, replies: {}, projects: {}, quests: {}, quick: {} }, readJSON("local.json", {}));
   const saveLocal = () => writeJSON("local.json", local);
 
   /* loading from the village */
@@ -142,7 +148,17 @@ module.exports.run = async function run({ agent: agentId }) {
     (await loadGlobal("data/agents.js", "VILLAGE_AGENTS")).map(({ id, name, job, personality }) => ({ id, name, job, personality })))) || [];
   const chat = (await cached("chat.json", async () => JSON.parse(await fetchText("data/chat.json")))) || { threads: {} };
   const state = (await cached("state.json", () => loadGlobal("data/state.js", "VILLAGE_STATE"))) || {};
-  const village = (await cached("config.json", async () => ({ ownerEmail: (await loadGlobal("config.js", "VILLAGE_CONFIG")).ownerEmail }))) || {};
+  const village = (await cached("config.json", async () => {
+    const c = await loadGlobal("config.js", "VILLAGE_CONFIG");
+    return { ownerEmail: c.ownerEmail, brain: c.brain };
+  })) || {};
+  // The AI that runs the villagers. Defaults are Claude's; config.js can name another.
+  const brain = Object.assign({
+    name: "Claude", app: "the Claude app",
+    callSetup: "https://claude.ai/projects", callLink: "https://claude.ai/project/",
+    connectors: "https://claude.ai/settings/connectors",
+    scheduledRuns: "https://claude.ai/code/routines", quickSetup: "https://claude.ai/code/routines",
+  }, village.brain || {});
 
   const agent = agents.find((a) => a.id === agentId);
   if (!agent) {
@@ -169,9 +185,19 @@ module.exports.run = async function run({ agent: agentId }) {
     const yours = new Set(msgs.filter((m) => m.from === "you").map((m) => norm(m.text)));
     const twoDays = Date.now() - 2 * 864e5;
     const before = local.pending[agent.id] || [];
-    const pending = before.filter((p) => !yours.has(norm(p.text)) && new Date(p.at) > twoDays);
-    if (pending.length !== before.length) { local.pending[agent.id] = pending; saveLocal(); }
-    return msgs.concat(pending.map((p) => Object.assign({ from: "you", pending: true }, p)));
+    // Answers an AI gave straight back stay here for a month, in case it never saves them to data/chat.json.
+    const month = Date.now() - 30 * 864e5;
+    const pending = before.filter((p) => !yours.has(norm(p.text)) && new Date(p.at) > (p.answered ? month : twoDays));
+    const theirs = new Set(msgs.filter((m) => m.from === agent.id).map((m) => norm(m.text)));
+    const beforeR = local.replies[agent.id] || [];
+    const replies = beforeR.filter((r) => !theirs.has(norm(r.text)) && new Date(r.at) > month).slice(-40);
+    if (pending.length !== before.length || replies.length !== beforeR.length) {
+      local.pending[agent.id] = pending;
+      local.replies[agent.id] = replies;
+      saveLocal();
+    }
+    const extra = pending.map((p) => p.answered ? { from: "you", text: p.text, at: p.at, via: p.via } : Object.assign({ from: "you", pending: true }, p));
+    return msgs.concat(extra, replies).sort((a, b) => new Date(a.at) - new Date(b.at));
   };
   const isUnread = (msgs) => {
     const last = msgs.filter((m) => m.from === agent.id).pop();
@@ -186,27 +212,43 @@ module.exports.run = async function run({ agent: agentId }) {
   /* quick replies */
   const today = () => new Date().toLocaleDateString("en-CA"); // YYYY-MM-DD, phone's time zone
   const quickUsed = () => (local.quick.date === today() ? local.quick.used || 0 : 0);
-  const quickReady = () => Keychain.contains(KEY.fire) && Keychain.contains(KEY.token);
+  const isClaudeFire = (url) => /^https:\/\/api\.anthropic\.com\/v1\/claude_code\/routines\/trig_\w+\/fire$/.test(url || "");
+  const quickURL = () => (Keychain.contains(KEY.fire) ? Keychain.get(KEY.fire) : "");
+  const quickToken = () => (Keychain.contains(KEY.token) ? Keychain.get(KEY.token) : "");
+  // A Claude address needs its token; another AI's address may work without one.
+  const quickReady = () => !!quickURL() && (!isClaudeFire(quickURL()) || !!quickToken());
 
-  // Starts the "Souq village chat" task with this one message. true if it started.
+  // Sends this one message to the quick-reply address. Returns false if it didn't
+  // go, true if it went, or the reply itself when the AI answers right away.
+  //   Claude scheduled task: its Fire URL; the message goes in "text".
+  //   Any other AI: POST { agent, text, via, at } as JSON, with the token (if any)
+  //   as a Bearer header. A 2xx answer means it went; { "reply": "…" } is shown at once.
   const fireQuick = async (text, via, at) => {
     if (!quickReady() || quickUsed() >= QUICK_PER_DAY) return false;
+    const message = { agent: agent.id, text, via, at };
+    const claude = isClaudeFire(quickURL());
     try {
-      const r = new Request(Keychain.get(KEY.fire));
+      const r = new Request(quickURL());
       r.method = "POST";
-      r.timeoutInterval = 20;
-      r.headers = {
-        Authorization: "Bearer " + Keychain.get(KEY.token),
-        "anthropic-beta": "experimental-cc-routine-2026-04-01",
-        "anthropic-version": "2023-06-01",
-        "Content-Type": "application/json",
-      };
-      r.body = JSON.stringify({ text: JSON.stringify({ agent: agent.id, text, via, at }) });
-      const res = await r.loadJSON();
-      if (r.response.statusCode >= 300 || !res || res.type !== "routine_fire") return false;
+      r.timeoutInterval = claude ? 20 : 60;
+      r.headers = { "Content-Type": "application/json" };
+      if (quickToken()) r.headers.Authorization = "Bearer " + quickToken();
+      if (claude) {
+        r.headers["anthropic-beta"] = "experimental-cc-routine-2026-04-01";
+        r.headers["anthropic-version"] = "2023-06-01";
+        r.body = JSON.stringify({ text: JSON.stringify(message) });
+      } else {
+        r.body = JSON.stringify(message);
+      }
+      const body = await r.loadString();
+      const code = r.response.statusCode;
+      if (code < 200 || code >= 300) return false;
+      let res = null;
+      try { res = JSON.parse(body); } catch (e) {}
+      if (claude && (!res || res.type !== "routine_fire")) return false;
       local.quick = { date: today(), used: quickUsed() + 1 };
       saveLocal();
-      return true;
+      return res && typeof res.reply === "string" && res.reply.trim() ? res.reply.trim() : true;
     } catch (e) {
       return false;
     }
@@ -222,15 +264,26 @@ module.exports.run = async function run({ agent: agentId }) {
   // Quick reply when possible, otherwise email. Returns how it went.
   const send = async (text, via) => {
     const at = new Date().toISOString();
-    const quick = await fireQuick(text, via, at);
+    const sent = await fireQuick(text, via, at);
+    const quick = !!sent;
     (local.pending[agent.id] = local.pending[agent.id] || []).push({ text, at, via, quick });
+    if (typeof sent === "string") {
+      // The AI answered straight away. Keep both lines here until data/chat.json has them.
+      const p = local.pending[agent.id];
+      p[p.length - 1].answered = true;
+      (local.replies[agent.id] = local.replies[agent.id] || []).push({ from: agent.id, text: sent, at: new Date().toISOString() });
+    }
     saveLocal();
     if (!quick) sendMail(text, via);
     return quick;
   };
 
-  /* Call: the villager's Claude Project */
-  const projectLink = () => local.projects[agent.id] || "";
+  /* Call: the villager's voice assistant in the AI's app (a Claude Project, a GPT, a Gem…) */
+  // A link saved for another AI is ignored once config.js names a new one, so Call asks to set up again.
+  const projectLink = () => {
+    const link = local.projects[agent.id] || "";
+    return link && (!brain.callLink || link.startsWith(brain.callLink)) ? link : "";
+  };
   const projectInstructions = () => {
     const others = agents.filter((a) => a.id !== agent.id).map((a) => a.name + " (" + a.job.split(".")[0] + ")").join("; ");
     return [
@@ -246,7 +299,7 @@ module.exports.run = async function run({ agent: agentId }) {
   };
 
   /* setup quest */
-  const quest = quests({ projectLink, quickReady, alias })[agent.id] || { intro: "", steps: [] };
+  const quest = quests({ projectLink, quickReady, alias, brain })[agent.id] || { intro: "", steps: [] };
   const questState = () => {
     const ticked = local.quests[agent.id] || {};
     const steps = quest.steps.map((s) => ({ id: s.id, text: s.text, buttons: s.buttons, done: s.auto ? s.auto() : !!ticked[s.id], auto: !!s.auto }));
@@ -394,6 +447,7 @@ module.exports.run = async function run({ agent: agentId }) {
     project: projectLink(),
     voice: VOICES[agent.id] || {},
     runTimes: RUN_TIMES,
+    brain: { name: brain.name, app: brain.app, claude: /claude\.ai/.test(brain.quickSetup) },
     quest: questState(),
     quick: { ready: quickReady(), used: quickUsed(), max: QUICK_PER_DAY, waitMin: QUICK_WAIT_MIN },
     now: Date.now(),
@@ -478,17 +532,21 @@ function questHTML() {
 }
 function panelHTML() {
   if (D.panel === "call") return '<div class="card"><b>Set up a call with ' + esc(D.agent.name) + '</b><ol>' +
-    '<li>Tap <b>Copy instructions</b>. Claude opens.</li>' +
-    '<li>Make a new Project named <b>' + esc(D.agent.name) + '</b> and paste into its instructions.</li>' +
-    '<li>In the project, copy its link (share, then Copy link), come back and tap <b>Save link</b>.</li></ol>' +
+    '<li>Tap <b>Copy instructions</b>. ' + esc(D.brain.name) + ' opens.</li>' +
+    '<li>Make a new assistant there (a Project in Claude, a GPT in ChatGPT, a Gem in Gemini) named <b>' + esc(D.agent.name) + '</b>, and paste into its instructions.</li>' +
+    '<li>Copy its link (share, then Copy link), come back and tap <b>Save link</b>.</li></ol>' +
     '<button class="btn primary" onclick="go(\\'copy\\')">Copy instructions</button> <button class="btn" onclick="go(\\'savelink\\')">Save link</button> <button class="btn" onclick="go(\\'close\\')">Close</button>' +
     (D.note ? '<p class="note">' + esc(D.note) + '</p>' : '') + '</div>';
-  if (D.panel === "quick") return '<div class="card"><b>Turn on quick replies</b><ol>' +
-    '<li>Tap <b>Open tasks</b> and open <b>Souq village chat</b>. Tap <b>Edit</b>, then <b>+</b> next to Trigger, then <b>API</b>.</li>' +
-    '<li>Copy the <b>Fire URL</b>, come back and tap <b>Paste</b>.</li>' +
-    '<li>Tap <b>Generate token</b>, copy it, come back and tap <b>Paste</b> again. The token shows only once.</li></ol>' +
-    '<button class="btn primary" onclick="go(\\'opentasks\\')">Open tasks</button> <button class="btn" onclick="go(\\'pastequick\\')">Paste</button> <button class="btn" onclick="go(\\'close\\')">Close</button>' +
-    '<p class="note">' + (D.note ? esc(D.note) : 'The token can only start that one task. It stays in this phone\\'s Keychain.') + '</p></div>';
+  if (D.panel === "quick") return '<div class="card"><b>Turn on quick replies</b><ol>' + (D.brain.claude
+    ? '<li>Tap <b>Open</b> and open <b>Souq village chat</b>. Tap <b>Edit</b>. Under repositories, add <b>souq-village</b>, so its replies can be saved.</li>' +
+      '<li>Still in Edit, tap <b>+</b> next to Trigger, then <b>API</b>.</li>' +
+      '<li>Copy the <b>Fire URL</b>, come back and tap <b>Paste</b>.</li>' +
+      '<li>Tap <b>Generate token</b>, copy it, come back and tap <b>Paste</b> again. The token shows only once.</li>'
+    : '<li>Tap <b>Open</b> and find the quick-reply address your ' + esc(D.brain.name) + ' setup gives you (SWITCHING.md).</li>' +
+      '<li>Copy the address, come back and tap <b>Paste</b>.</li>' +
+      '<li>If it has a token or secret, copy that and tap <b>Paste</b> again.</li>') + '</ol>' +
+    '<button class="btn primary" onclick="go(\\'opentasks\\')">Open</button> <button class="btn" onclick="go(\\'pastequick\\')">Paste</button> <button class="btn" onclick="go(\\'forgetquick\\')">Forget</button> <button class="btn" onclick="go(\\'close\\')">Close</button>' +
+    '<p class="note">' + (D.note ? esc(D.note) : 'The token stays in this phone\\'s Keychain. Forget clears the address and token, to switch to another AI.') + '</p></div>';
   return "";
 }
 function render(next) {
@@ -566,30 +624,34 @@ if (D.compose && !showQuest) setTimeout(() => $("box").focus(), 300);
         panel = "";
       } else if (action === "copy") {
         Pasteboard.copy(projectInstructions());
-        Safari.open("https://claude.ai/projects");
+        Safari.open(brain.callSetup);
       } else if (action === "savelink") {
         const link = (Pasteboard.paste() || "").trim().split(/\s/)[0];
-        if (!/^https:\/\/claude\.ai\/project\/[\w-]+/.test(link)) return update({ note: "Copy the project's link first. It starts with https://claude.ai/project/" });
+        if (!/^https:\/\/\S+$/.test(link) || (brain.callLink && !link.startsWith(brain.callLink))) return update({ note: "Copy the assistant's link first. It starts with " + (brain.callLink || "https://") });
         local.projects[agent.id] = link;
         saveLocal();
         panel = "";
       } else if (action === "opentasks") {
-        Safari.open("https://claude.ai/code/routines");
+        Safari.open(brain.quickSetup);
       } else if (action === "pastequick") {
         const text = (Pasteboard.paste() || "").trim();
         let note;
-        if (/^https:\/\/api\.anthropic\.com\/v1\/claude_code\/routines\/trig_\w+\/fire$/.test(text)) {
+        if (/^https:\/\/\S+$/.test(text)) {
           Keychain.set(KEY.fire, text);
-          note = Keychain.contains(KEY.token) ? "" : "Fire URL saved. Now copy the token and tap Paste.";
-        } else if (/^sk-ant-\S+$/.test(text)) {
+          note = quickReady() ? "Address saved. If it has a token, copy it and tap Paste." : "Address saved. Now copy the token and tap Paste.";
+        } else if (/^\S{12,}$/.test(text)) {
           Keychain.set(KEY.token, text);
           Pasteboard.copy(""); // don't leave the token on the clipboard
-          note = Keychain.contains(KEY.fire) ? "" : "Token saved. Now copy the Fire URL and tap Paste.";
+          note = Keychain.contains(KEY.fire) ? "" : "Token saved. Now copy the address and tap Paste.";
         } else {
-          note = "That isn't a Fire URL or a token. Copy one of them first.";
+          note = "Copy the quick-reply address or its token first.";
         }
-        if (quickReady()) panel = "";
+        if (quickReady() && !note) panel = "";
         return update({ note: note || "", panel });
+      } else if (action === "forgetquick") {
+        if (Keychain.contains(KEY.fire)) Keychain.remove(KEY.fire);
+        if (Keychain.contains(KEY.token)) Keychain.remove(KEY.token);
+        return update({ note: "Quick replies are off. Paste a new address to turn them on.", panel });
       } else if (action === "tick" && step && !step.auto) {
         const t = (local.quests[agent.id] = local.quests[agent.id] || {});
         t[step.id] = !t[step.id];

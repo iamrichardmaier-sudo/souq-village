@@ -22,6 +22,11 @@
   status = 404
   force = true
 [[redirects]]
+  from = "/AGENTS.md"
+  to = "/"
+  status = 404
+  force = true
+[[redirects]]
   from = "/data/brain.json"
   to = "/"
   status = 404

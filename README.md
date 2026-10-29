@@ -22,10 +22,11 @@ Handy for testing: `?hour=21` forces the time to 9 pm, and `?weather=rain` (also
 |---|---|
 | `config.js` | Your email, WhatsApp number, location fallback, your character, library links, sound files |
 | `data/agents.js` | The agents: name, house, job, personality, look, who's married |
-| `data/state.js` | What each agent is doing right now. The Claude task rewrites this. |
+| `data/state.js` | What each agent is doing right now. The scheduled AI run rewrites this. |
 | `PHONE.md` | Setting up the phone widgets, Siri and calls |
-| `data/chat.json` | The conversations the phone widgets show. The Claude task writes it. |
-| `CLAUDE.md` | The instructions the agents follow when Claude runs them |
+| `data/chat.json` | The conversations the phone widgets show. The AI writes it. |
+| `AGENTS.md` | The instructions the agents follow, for whichever AI runs them (`CLAUDE.md` points Claude to it) |
+| `SWITCHING.md` | How to move the village to another AI |
 | `ART_PROMPTS.md` | Gemini prompts and exact filenames for characters and rooms |
 | `js/painted.js` | Where people can walk on the painting, and where each door and lantern is |
 
@@ -43,7 +44,9 @@ Every agent has an email alias on your one inbox: `you+muse@gmail.com`, `you+lay
 
 ### Who does the thinking
 
-The agents run on **Claude Code as a scheduled task** using your Claude subscription. You don't need an API key and none is stored. Each run, Claude reads the new mail to the aliases through the Gmail connector, answers as each agent following `CLAUDE.md`, updates `data/state.js`, and pushes. The hosted page picks that up within a minute.
+The agents run on **Claude Code as a scheduled task** using your Claude subscription. You don't need an API key and none is stored. Each run, Claude reads the new mail to the aliases through the Gmail connector, answers as each agent following `AGENTS.md`, updates `data/state.js`, and pushes. The hosted page picks that up within a minute.
+
+Nothing is locked to Claude. Any AI that can push to this repo, read Gmail and run on a schedule can take over; see `SWITCHING.md`.
 
 ### Skills, hearts and levels
 
@@ -51,7 +54,7 @@ The village works like Stardew Valley. What you do during the day earns XP in 6 
 
 ## Phone: widgets, Siri and calls
 
-Each villager has their own home-screen widget with their portrait. Text them there, and they answer in a minute or two (20 quick replies a day, then by email at the next run). Hear replies out loud, or tap **📞 Call** to talk live in the Claude app. Siri works too: *"Hey Siri, Talk to Ahmed."* No API keys are needed. The first time you open a villager, they ask you to set up the connections they need. Setup is in `PHONE.md`; the scripts are in `scriptable/villagers/`, and they share `scriptable/SouqCore.js`.
+Each villager has their own home-screen widget with their portrait. Text them there, and they answer in a minute or two (20 quick replies a day, then by email at the next run). Hear replies out loud, or tap **📞 Call** to talk live in your AI's app. Siri works too: *"Hey Siri, Talk to Ahmed."* No API keys are needed. The first time you open a villager, they ask you to set up the connections they need. Setup is in `PHONE.md`; the scripts are in `scriptable/villagers/`, and they share `scriptable/SouqCore.js`.
 
 ## Sound
 
