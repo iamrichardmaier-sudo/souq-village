@@ -14,6 +14,7 @@ This repo is a village of AI agents. The page (`index.html`) only shows them. Th
 2. **Read the mail.** With your Gmail access, find mail sent to the owner's agent aliases since `lastRun` in `data/brain.json`:
    `to:(OWNER+muse@gmail.com OR OWNER+layla@gmail.com …)`. The address after the `+` is the agent's `id`. Take OWNER from `ownerEmail` in `config.js`.
    Also find replies the owner sent in those threads, and WhatsApp-forwarded notes, if any.
+   Mail relayed from WhatsApp (for example by the owner's Meta AI / Muse) starts with an agent's name ("Ahmed: …"). Treat it as mail from the owner to that agent.
 3. **Do the work.** For each message, act as that agent:
    - Do what was asked if it fits the agent's job. If it doesn't fit, say who in the village it does fit.
    - Answer the owner in the same Gmail thread, signed as the agent. If sending ever fails, leave a draft instead and set that agent's `messageNote` to "Reply waiting in your drafts".

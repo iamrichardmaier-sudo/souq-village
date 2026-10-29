@@ -9,6 +9,8 @@
 //   look        colors for the drawn character until their images are added
 //               head: "keffiyeh" | "hijab" | "kufi" | "turban" | "none"
 //   lines       optional things they say in the souq (greet / idle / reply)
+//   whatsapp    optional: this agent's own WhatsApp number, digits only (see WHATSAPP_AND_CALLS.md).
+//               Without it, the shared whatsappNumber in config.js is used.
 window.VILLAGE_AGENTS = [
   {
     id: "muhammad", name: "Muhammad", home: "post",

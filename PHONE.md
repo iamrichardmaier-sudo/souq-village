@@ -9,7 +9,7 @@ No API keys are involved:
 - **After 20,** or before quick replies are on, texts go out as email to the villager's alias (`you+ahmed@gmail.com`). The next village run answers them (12:20, 6:20 and 11:20).
 - **Calls** open that villager's assistant in your AI's app (a Claude Project today) for live voice.
 
-To move all of this to another AI, see `SWITCHING.md`.
+To move all of this to another AI, see `SWITCHING.md`. For WhatsApp and real phone calls, see `WHATSAPP_AND_CALLS.md`.
 
 ## 1. The villager scripts (Scriptable)
 

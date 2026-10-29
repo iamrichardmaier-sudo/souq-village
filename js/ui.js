@@ -9,7 +9,11 @@
     return at < 0 ? e : e.slice(0, at) + "+" + id + e.slice(at);
   };
   const mailto = (id, subject) => `mailto:${UI.alias(id)}${subject ? "?subject=" + encodeURIComponent(subject) : ""}`;
-  const wa = (name) => (cfg.whatsappNumber ? `https://wa.me/${cfg.whatsappNumber}?text=${encodeURIComponent(name + ": ")}` : null);
+  // An agent with their own WhatsApp number gets a plain chat; otherwise the shared number, with their name first.
+  const wa = (d) => {
+    const num = d.whatsapp || cfg.whatsappNumber;
+    return num ? `https://wa.me/${num}?text=${encodeURIComponent(d.whatsapp ? "" : d.name + ": ")}` : null;
+  };
   const ago = (iso) => {
     const d = (Date.now() - new Date(iso).getTime()) / 60000;
     if (!isFinite(d)) return "";
@@ -113,7 +117,7 @@
   const card = (a) => {
     const st = AG.st(a.id), d = a.data, msg = AG.hasMessage(a.id);
     const others = AG.list.filter((o) => o !== a);
-    const waLink = wa(d.name);
+    const waLink = wa(d);
     const log = AG.activityFor(a.id);
     return `<div class="card" data-agent="${a.id}">
       <div class="top"><canvas class="portrait" width="128" height="128" data-portrait="${a.id}"></canvas>
