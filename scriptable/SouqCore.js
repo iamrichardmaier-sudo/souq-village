@@ -713,3 +713,178 @@ if (D.compose && !showQuest) setTimeout(() => $("box").focus(), 300);
     Script.setShortcutOutput(siriLine());
   }
 };
+
+/* ---------- the village widget ---------- */
+
+// The souq itself on your home screen: the same painted scene the game shows
+// for your time and weather, who has news, and a tap that opens the game.
+module.exports.village = async function village() {
+  const VILLAGE_URL = Keychain.get(KEY.url);
+  const fm = FileManager.local();
+  const dir = fm.joinPath(fm.documentsDirectory(), "souq-chat");
+  if (!fm.fileExists(dir)) fm.createDirectory(dir, true);
+  const file = (name) => fm.joinPath(dir, name);
+  const readJSON = (name, fallback) => {
+    try { return fm.fileExists(file(name)) ? JSON.parse(fm.readString(file(name))) : fallback; } catch (e) { return fallback; }
+  };
+  const fetchText = async (path) => {
+    const r = new Request(VILLAGE_URL + path + "?t=" + Date.now());
+    r.timeoutInterval = 15;
+    return r.loadString();
+  };
+  const cached = async (name, load) => {
+    try { const v = await load(); fm.writeString(file(name), JSON.stringify(v)); return v; } catch (e) { return readJSON(name, null); }
+  };
+  const loadGlobal = async (path, name) => {
+    const win = {};
+    new Function("window", await fetchText(path))(win);
+    return win[name];
+  };
+  const image = async (path, cacheName) => {
+    const p = file(cacheName);
+    try {
+      const img = await new Request(VILLAGE_URL + path).loadImage();
+      fm.writeImage(p, img);
+      return img;
+    } catch (e) {
+      return fm.fileExists(p) ? fm.readImage(p) : null;
+    }
+  };
+
+  const cfg = (await cached("village-config.json", async () => {
+    const c = await loadGlobal("config.js", "VILLAGE_CONFIG");
+    return { name: c.villageName, ar: c.villageNameArabic, location: c.location, unit: c.temperatureUnit };
+  })) || {};
+  const agents = (await cached("agents.json", async () =>
+    (await loadGlobal("data/agents.js", "VILLAGE_AGENTS")).map(({ id, name, job, personality }) => ({ id, name, job, personality })))) || [];
+  const chat = (await cached("chat.json", async () => JSON.parse(await fetchText("data/chat.json")))) || { threads: {} };
+  const state = (await cached("state.json", () => loadGlobal("data/state.js", "VILLAGE_STATE"))) || {};
+  const local = readJSON("local.json", {});
+
+  /* weather and the time of day, the same way the game decides */
+  const loc = cfg.location || { lat: 40.2338, lon: -111.6585 };
+  const unit = cfg.unit === "celsius" ? "celsius" : "fahrenheit";
+  const wx = await cached("weather.json", async () => {
+    const url = "https://api.open-meteo.com/v1/forecast?latitude=" + loc.lat + "&longitude=" + loc.lon +
+      "&current=temperature_2m,weather_code&daily=sunrise,sunset&forecast_days=1&timezone=auto&temperature_unit=" + unit;
+    const d = await new Request(url).loadJSON();
+    const hm = (s) => { const t = s.split("T")[1].split(":"); return +t[0] * 60 + +t[1]; };
+    return { code: d.current.weather_code, temp: Math.round(d.current.temperature_2m), rise: hm(d.daily.sunrise[0]), set: hm(d.daily.sunset[0]) };
+  });
+  const code = wx ? wx.code : 0;
+  const kind = code === 45 || code === 48 ? "fog" : (code >= 51 && code <= 67) || (code >= 80 && code <= 82) || code >= 95 ? "rain"
+    : (code >= 71 && code <= 77) || code === 85 || code === 86 ? "snow" : "clear";
+  const icon = code === 0 ? "☀️" : code <= 2 ? "⛅" : code === 3 ? "☁️" : kind === "fog" ? "🌫️" : kind === "snow" ? "🌨️" : code >= 95 ? "⛈️" : kind === "rain" ? "🌧️" : "☀️";
+  const now = new Date();
+  const mins = now.getHours() * 60 + now.getMinutes();
+  const rise = wx ? wx.rise : 7 * 60, set = wx ? wx.set : 19 * 60;
+  const night = mins < rise - 30 || mins > set + 30;
+  const scene = kind === "rain" ? (night ? "rain-night" : "rain") : kind === "snow" ? "snow" : kind === "fog" ? "fog"
+    : night ? "night" : mins < rise + 90 ? "morning" : mins > set - 90 ? "sunset" : "day";
+  const moonIcon = night && kind === "clear" ? "🌙" : icon;
+
+  /* who has news: a reply you haven't seen, or the village flagging them */
+  const hasNews = (a) => {
+    const last = ((chat.threads || {})[a.id] || []).filter((m) => m.from === a.id).pop();
+    const seen = (local.seen || {})[a.id];
+    const unread = !!last && (!seen || new Date(last.at) > new Date(seen));
+    return unread || !!((state.agents || {})[a.id] || {}).message;
+  };
+  const news = agents.filter(hasNews);
+
+  /* the picture, cropped to the widget's shape and shaded top and bottom */
+  const family = config.widgetFamily || "medium";
+  const map = await image("assets/map/widget/" + scene + ".jpg", "map-" + scene + ".jpg");
+  const art = (() => {
+    if (!map) return null;
+    const W = map.size.width, H = map.size.height;
+    const aspect = family === "small" ? 1 : family === "large" ? 1.05 : 2.13;
+    let cw = W, ch = W / aspect;
+    if (ch > H) { ch = H; cw = H * aspect; }
+    const cx = Math.min(Math.max(W * 0.51 - cw / 2, 0), W - cw); // the fountain is the heart of the souq
+    const cy = Math.min(Math.max(H * 0.55 - ch / 2, 0), H - ch);
+    const outW = 700, outH = Math.round(700 / aspect);
+    const ctx = new DrawContext();
+    ctx.size = new Size(outW, outH);
+    ctx.opaque = true;
+    ctx.respectScreenScale = false;
+    const scale = outW / cw;
+    ctx.drawImageInRect(map, new Rect(-cx * scale, -cy * scale, W * scale, H * scale));
+    const shade = (from, to, max, down) => {
+      const steps = 24, h = (to - from) / steps;
+      for (let i = 0; i < steps; i++) {
+        const t = down ? (i + 1) / steps : 1 - i / steps;
+        ctx.setFillColor(new Color("#1d120a", max * t * t));
+        ctx.fillRect(new Rect(0, from + i * h, outW, h + 1));
+      }
+    };
+    shade(0, outH * 0.32, 0.55, false);
+    shade(outH * 0.55, outH, 0.75, true);
+    return ctx.getImage();
+  })();
+
+  /* the widget */
+  const w = new ListWidget();
+  w.url = VILLAGE_URL;
+  w.refreshAfterDate = new Date(Date.now() + 30 * 60 * 1000);
+  if (art) w.backgroundImage = art;
+  else w.backgroundColor = new Color("#2f7a78");
+  w.setPadding(12, 14, 12, 14);
+  const white = Color.white();
+  const soft = new Color("#fff3df");
+  const shadow = (t) => { t.shadowColor = new Color("#000000", 0.6); t.shadowRadius = 3; t.shadowOffset = new Point(0, 1); return t; };
+
+  const top = w.addStack();
+  top.centerAlignContent();
+  const names = top.addStack();
+  names.layoutVertically();
+  const title = shadow(names.addText(cfg.name || "Souq al-Qamar"));
+  title.font = Font.boldSystemFont(family === "small" ? 14 : 16);
+  title.textColor = white;
+  title.lineLimit = 1;
+  title.minimumScaleFactor = 0.8;
+  if (cfg.ar) {
+    const ar = shadow(names.addText(cfg.ar));
+    ar.font = Font.mediumSystemFont(11);
+    ar.textColor = soft;
+  }
+  top.addSpacer();
+  if (wx) {
+    const t = shadow(top.addText(moonIcon + " " + wx.temp + "°"));
+    t.font = Font.semiboldSystemFont(family === "small" ? 12 : 14);
+    t.textColor = white;
+  }
+
+  w.addSpacer();
+  const line = shadow(w.addText(news.length === 0 ? "All quiet in the souq"
+    : news.length === 1 ? news[0].name + " has news for you" : news.length + " villagers have news"));
+  line.font = Font.semiboldSystemFont(family === "small" ? 12 : 13);
+  line.textColor = white;
+  line.lineLimit = 2;
+
+  if (family !== "small") {
+    // Everyone's face; tap one to open their chat. A rose ring means news.
+    w.addSpacer(6);
+    const row = w.addStack();
+    row.centerAlignContent();
+    const size = family === "large" ? 40 : 30;
+    for (const a of agents) {
+      const face = await image("assets/agents/" + a.id + "/portrait.png", "portrait-" + a.id + ".png");
+      if (!face) continue;
+      const cell = row.addStack();
+      cell.url = "scriptable:///run/" + encodeURIComponent(a.name) + "?open=1";
+      const pic = cell.addImage(face);
+      pic.imageSize = new Size(size, size);
+      pic.cornerRadius = size / 2;
+      pic.borderWidth = hasNews(a) ? 3 : 1;
+      pic.borderColor = hasNews(a) ? new Color("#ff6b86") : new Color("#ffffff", 0.7);
+      row.addSpacer(family === "large" ? 10 : 7);
+    }
+    row.addSpacer();
+  }
+
+  if (config.runsInWidget) Script.setWidget(w);
+  else if (family === "small") await w.presentSmall();
+  else if (family === "large") await w.presentLarge();
+  else await w.presentMedium();
+};
