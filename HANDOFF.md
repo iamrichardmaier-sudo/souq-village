@@ -40,7 +40,7 @@ In `benarabic`, merge the branch `claude/festive-feynman-o0eq3d` into `main`. It
 ### 3. Put the village online (if not done yet)
 1. On Netlify, go to **Add new site → Import from GitHub** and pick `souq-village`.
 2. Leave the build command empty and set the publish directory to `.`. `netlify.toml` already sets both.
-3. Put the site address into `VILLAGE_URL` in `scriptable/LevelUpNotify.js` and your phone's copy of it. The villager scripts ask for it the first time you open one.
+3. The phone scripts ask for the site address the first time you open a villager, and the level-up script uses the same one.
 
 The site is public, but its address is hard to guess. Don't post the link.
 

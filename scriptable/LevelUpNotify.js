@@ -7,7 +7,8 @@
 // 3. Run it once by hand so iOS asks to allow Scriptable's notifications.
 // Each level-up notifies once; tapping it opens the village.
 
-const VILLAGE_URL = "https://YOUR-SITE.netlify.app/"; // the village's address, ending with /
+// The village's address: the one your villager scripts saved, or set it here (ending with /).
+const VILLAGE_URL = Keychain.contains("souq.villageURL") ? Keychain.get("souq.villageURL") : "https://YOUR-SITE.netlify.app/";
 
 async function loadGlobal(path, name) {
   const txt = await new Request(VILLAGE_URL + path + "?t=" + Date.now()).loadString();
