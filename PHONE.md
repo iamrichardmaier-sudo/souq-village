@@ -31,6 +31,8 @@ Long-press the home screen → **+** → **Scriptable**, pick a size, then long-
 
 **In the chat:** type, or tap 🎤 on the keyboard to talk. **🔊 Listen** reads a reply in that villager's voice. **↻ Check** looks for replies. **📜 Setup** opens their task again.
 
+**The whole village:** make one more script named **Souq Village** from `scriptable/Souq Village.js`, and add it as a widget of any size. It shows the painted souq the way the game shows it right now (morning, midday, sunset, night, rain, fog or snow), the weather, and who has news. Tap it to open the game. On medium and large, tap a face to open that villager's chat; a pink ring means they have news.
+
 ## 3. The setup tasks
 
 Each villager's task is a checklist. Every step has buttons that take you to the right place or copy what you need. Tap the circle when a step is done. Steps the phone can check, like quick replies and calls, tick themselves.
