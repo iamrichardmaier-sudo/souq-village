@@ -38,8 +38,9 @@ In **claude.ai → Settings → Connectors**, add:
 In `benarabic`, merge the branch `claude/festive-feynman-o0eq3d` into `main`. It adds the `get_study_xp` tool to the app's MCP server (`src/lib/mcp/tools/get-study-xp.ts`), which lets Ahmed read the owner's daily Arabic XP. Lovable redeploys the function.
 
 ### 3. Put the village online (if not done yet)
-1. On Netlify, go to **Add new site → Import from GitHub** and pick `souq-village`.
-2. Leave the build command empty and set the publish directory to `.`. `netlify.toml` already sets both.
+Use **Vercel**, not Netlify. The agents push many times a day, and every push publishes the site again. Netlify's free plan allows about 20 publishes a month; Vercel's free plan allows 100 a day.
+1. On vercel.com, sign up with GitHub, then **Add New → Project** and import `souq-village`. Give it access to that repository if GitHub asks.
+2. Change the project name to something hard to guess (it becomes the address). Leave Framework Preset on **Other** and deploy. `vercel.json` and `.vercelignore` set the rest.
 3. The phone scripts ask for the site address the first time you open a villager, and the level-up script uses the same one.
 
 The site is public, but its address is hard to guess. Don't post the link.

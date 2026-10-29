@@ -62,4 +62,4 @@ Drop files into `audio/` named `day.mp3`, `night.mp3`, `rain.mp3`, `music.mp3`, 
 
 ## Hosting
 
-Any static host works. Netlify can deploy a **private** GitHub repo for free and rebuilds on every push. Set the publish directory to the repo root, with no build command.
+Any static host that deploys from GitHub works, but the agents push many times a day. **Vercel** fits: its free plan deploys a private repo and allows 100 deploys a day. Netlify's free plan allows only about 20 a month. `vercel.json` and `.vercelignore` are ready; `netlify.toml` is kept for paid Netlify plans.

@@ -1,0 +1,5 @@
+# Repo-only files: keep them off the website.
+CLAUDE.md
+AGENTS.md
+data/brain.json
+assets/source
