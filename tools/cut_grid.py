@@ -22,15 +22,48 @@ img = Image.fromarray(np.dstack([np.clip(rgb, 0, 255).astype(np.uint8), alpha]),
 img.putalpha(img.getchannel("A").filter(ImageFilter.MinFilter(3)).filter(ImageFilter.GaussianBlur(0.6)))
 solid = np.asarray(img.getchannel("A")) > 40
 H, W = solid.shape
+
+# Label connected shapes on a 4x smaller mask, so a neighbour's tail or ear
+# reaching into a cell is not mistaken for part of that cell's animal.
+F = 4
+small = solid[: H // F * F, : W // F * F].reshape(H // F, F, W // F, F).any(axis=(1, 3))
+labels = np.zeros(small.shape, np.int32)
+comps = []  # (label, area, cx, cy)
+h, w = small.shape
+for y in range(h):
+    for x in range(w):
+        if not small[y, x] or labels[y, x]:
+            continue
+        lab = len(comps) + 1
+        stack, area, sx, sy = [(y, x)], 0, 0, 0
+        labels[y, x] = lab
+        while stack:
+            cy, cx = stack.pop()
+            area += 1; sx += cx; sy += cy
+            for ny, nx in ((cy + 1, cx), (cy - 1, cx), (cy, cx + 1), (cy, cx - 1), (cy + 1, cx + 1), (cy - 1, cx - 1), (cy + 1, cx - 1), (cy - 1, cx + 1)):
+                if 0 <= ny < h and 0 <= nx < w and small[ny, nx] and not labels[ny, nx]:
+                    labels[ny, nx] = lab
+                    stack.append((ny, nx))
+        comps.append((lab, area, sx / area * F, sy / area * F))
+full_labels = np.kron(labels, np.ones((F, F), np.int32))
+full_labels = np.pad(full_labels, ((0, H - full_labels.shape[0]), (0, W - full_labels.shape[1])))
+
 n = first
 for row in range(rows):
     for col in range(cols):
         x0, x1, y0, y1 = col * W // cols, (col + 1) * W // cols, row * H // rows, (row + 1) * H // rows
-        cell = solid[y0:y1, x0:x1]
-        ys, xs = np.where(cell)
-        if len(xs) < 50:
+        mine = [c for c in comps if x0 <= c[2] < x1 and y0 <= c[3] < y1]
+        if not mine:
             print("empty cell", row, col); n += 1; continue
-        crop = img.crop((x0 + xs.min(), y0 + ys.min(), x0 + xs.max() + 1, y0 + ys.max() + 1))
+        biggest = max(c[1] for c in mine)
+        keep = [c[0] for c in mine if c[1] >= biggest * 0.04]
+        mask = np.isin(full_labels, keep) & solid
+        ys, xs = np.where(mask)
+        bx0, bx1, by0, by1 = xs.min(), xs.max() + 1, ys.min(), ys.max() + 1
+        crop = img.crop((bx0, by0, bx1, by1))
+        a = np.asarray(crop).copy()
+        a[..., 3] = np.where(mask[by0:by1, bx0:bx1] | (np.isin(full_labels[by0:by1, bx0:bx1], keep)), a[..., 3], 0)
+        crop = Image.fromarray(a, "RGBA")
         side = 256
         sc = (side - 16) / max(crop.size)
         crop = crop.resize((max(1, round(crop.width * sc)), max(1, round(crop.height * sc))), Image.LANCZOS)

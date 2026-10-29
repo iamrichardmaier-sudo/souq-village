@@ -207,7 +207,7 @@
       <div class="card"><h4>Friendship</h4><ul class="log">${friendRows}</ul>
       <p class="note">Hearts grow when you do what someone specializes in. Each person gives at most ${P.DAILY_FRIENDSHIP_CAP} points a day.</p></div>
       <div class="card"><h4>Pets</h4><p class="note">Villagers will give you pets for quests. ${owned.size} of ${pets.length} found.</p>
-        <div class="pets">${pets.map((p) => `<div class="pet t${p.tier}${owned.has(p.n) ? "" : " locked"}"><img src="assets/pets/${String(p.n).padStart(2, "0")}.png" alt="${owned.has(p.n) ? V.esc(p.name) : "Not found yet"}" loading="lazy">${owned.has(p.n) ? V.esc(p.name) : "?"}</div>`).join("")}</div></div>
+        <div class="pets">${pets.map((p) => `<div class="pet t${p.tier}${owned.has(p.n) ? "" : " locked"}"><span class="frame"><img src="assets/pets/${String(p.n).padStart(2, "0")}.png" alt="${owned.has(p.n) ? V.esc(p.name) : "Not found yet"}" loading="lazy"></span>${owned.has(p.n) ? V.esc(p.name) : "?"}</div>`).join("")}</div></div>
       <div class="card"><h4>Counted so far today</h4>${counted ? `<ul class="log">${counted}</ul>` : `<p class="note">Nothing yet today. XP turns into levels at the end of the day.</p>`}</div>`;
   };
 
