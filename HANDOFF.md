@@ -89,7 +89,7 @@ Use the text in `HIGGSFIELD_PROMPTS.md` §7 so Muse emails school updates to `i.
 - **Characters on the map** are drawn at `V.personScale` (1.6) in `js/painted.js`. They walk on a 16-pixel grid traced from the painting.
 - **The owner's character:** `assets/avatar/` (idle, working, wave, walk, portrait), cut from `assets/source/sheet-you.jpg`. It was made from a selfie the owner shared in chat. The selfie itself is not in the repo.
 - **Pets:** 30 icons in `assets/pets/01–30.png`, listed in `data/pets.js` (tier 1 everyday, tier 2 desert, tier 3 legendary). Owned pets are `player.pets` (an array of numbers) in `data/state.js`; the 📜 panel shows them, with silhouettes for the rest. Cut sheets with `python3 -I tools/cut_grid.py sheet.png assets/pets <first number>`; the original sheets are `assets/source/pets1–3.jpg`.
-- **Phone chat** (`PHONE.md`):
+- **Phone chat** (`PHONE.md`, and `scriptable/README.md` for the code):
   - Each villager has a small script in `scriptable/villagers/`. It downloads `scriptable/SouqCore.js` from the site, which does the widget, the chat, the setup quest and Siri.
   - **Quick replies:** the phone starts the **Souq village chat** scheduled task through its API trigger (token in the phone's Keychain, 20 a day). Its rules are in `AGENTS.md` → Quick replies. Any AI can take this over (`SWITCHING.md`): the phone posts `{ agent, text, via, at }` to whatever address is saved.
   - **Otherwise** texts go out as email with a `(widget)`, `(Siri)` or `(call notes)` subject.

@@ -24,6 +24,7 @@ Handy for testing: `?hour=21` forces the time to 9 pm, and `?weather=rain` (also
 | `data/agents.js` | The agents: name, house, job, personality, look, who's married |
 | `data/state.js` | What each agent is doing right now. The scheduled AI run rewrites this. |
 | `PHONE.md` | Setting up the phone widgets, Siri and calls |
+| `scriptable/` | Every phone script; `scriptable/README.md` explains how they fit together |
 | `data/chat.json` | The conversations the phone widgets show. The AI writes it. |
 | `AGENTS.md` | The instructions the agents follow, for whichever AI runs them (`CLAUDE.md` points Claude to it) |
 | `SWITCHING.md` | How to move the village to another AI |
