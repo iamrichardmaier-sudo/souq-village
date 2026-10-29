@@ -4,7 +4,9 @@
 (function () {
   if ((V.cfg.map || "painted") !== "painted") return;
   const C = 16; // walk-grid cell size in picture pixels
-  const IMG = { src: "assets/map/souq.jpg", w: 2000, h: 1116 };
+  const IMG = { src: "assets/map/souq-day.jpg", fallback: "assets/map/souq.jpg", w: 2000, h: 1116 };
+  // Painted versions of the same map, crossfaded by the real time and weather.
+  const VARIANTS = ["morning", "sunset", "night", "rain", "rain-night", "fog", "snow"];
   const NX = Math.ceil(IMG.w / C), NY = Math.ceil(IMG.h / C);
 
   // Open ground people can walk on.
@@ -54,7 +56,7 @@
   // Positions are in grid cells; the screen is the picture itself.
   V.iso = (x, y, z = 0) => ({ x: x * C, y: y * C - z });
   V.unIso = (sx, sy) => ({ x: sx / C, y: sy / C });
-  V.personScale = 1.3;
+  V.personScale = 1.6;
 
   const W = (V.world = {
     painted: true, NX, NY, bounds: { x0: 0, y0: 0, x1: IMG.w, y1: IMG.h },
@@ -134,19 +136,35 @@
     return null;
   };
 
-  W.ready = new Promise((res) => {
-    const img = new Image();
-    img.onload = () => { W.groundCanvas = img; res(); };
-    img.onerror = () => { const c = document.createElement("canvas"); c.width = IMG.w; c.height = IMG.h; W.groundCanvas = c; res(); };
-    img.src = IMG.src;
-  });
+  const loadImg = (src) => new Promise((res) => { const img = new Image(); img.onload = () => res(img); img.onerror = () => res(null); img.src = src; });
+  W.variants = {};
+  W.ready = (async () => {
+    let img = (await loadImg(IMG.src)) || (await loadImg(IMG.fallback));
+    if (!img) { img = document.createElement("canvas"); img.width = IMG.w; img.height = IMG.h; }
+    W.groundCanvas = img;
+    // the other versions load in the background
+    VARIANTS.forEach((n) => loadImg("assets/map/souq-" + n + ".jpg").then((im) => im && (W.variants[n] = im)));
+  })();
+
+  // True once the painted night exists: the picture then carries its own lighting.
+  W.hasLighting = () => !!W.variants.night;
+  W.drawGround = (ctx) => {
+    const v = W.variants, L = V.sky.light(), kind = V.sky.weather.kind;
+    const draw = (img, a) => { if (!img || a <= 0.01) return; ctx.globalAlpha = Math.min(1, a); ctx.drawImage(img, 0, 0, IMG.w, IMG.h); };
+    const wet = kind === "rain" || kind === "storm";
+    const weatherImg = wet ? v.rain : kind === "snow" ? v.snow : kind === "fog" ? v.fog : null;
+    draw(weatherImg || W.groundCanvas, 1);
+    if (!weatherImg) draw(V.sky.minutes() < 720 ? v.morning : v.sunset, L.golden * 0.9);
+    draw(wet ? v["rain-night"] || v.night : v.night, L.night);
+    ctx.globalAlpha = 1;
+  };
   W.build = () => {
     W.lights = lanterns.map(([x, y]) => ({ x, y, r: 70, kind: "lantern" }));
   };
   W.assetKeys = () => {
     const keys = new Set(["avatar/idle", "avatar/working", "rooms/house"]);
     W.places.forEach((p) => keys.add("rooms/" + p.id));
-    (window.VILLAGE_AGENTS || []).forEach((a) => ["idle", "working", "portrait"].forEach((s) => keys.add("agents/" + a.id + "/" + s)));
+    (window.VILLAGE_AGENTS || []).forEach((a) => ["idle", "working", "walk", "wave", "portrait"].forEach((s) => keys.add("agents/" + a.id + "/" + s)));
     return [...keys];
   };
 })();

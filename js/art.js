@@ -446,7 +446,9 @@
   // (x, y) = feet on screen. o: look + { facing: 1|-1, walk: phase|null, bob, scale, id }
   A.person = (ctx, x, y, o, t) => {
     const s = o.scale || V.personScale || 1;
-    const img = o.id && V.assets.get((o.id === "avatar" ? "avatar/" : "agents/" + o.id + "/") + (o.working ? "working" : "idle"));
+    const dir = o.id === "avatar" ? "avatar/" : "agents/" + o.id + "/";
+    const pose = o.working ? "working" : o.walk != null ? (Math.floor(t * 3.2) % 2 ? "walk" : "idle") : o.waving ? "wave" : "idle";
+    const img = o.id && (V.assets.get(dir + pose) || V.assets.get(dir + "idle"));
     ctx.save();
     ctx.translate(x, y);
     ctx.fillStyle = "rgba(60,35,20,.25)"; ctx.beginPath(); ctx.ellipse(0, 0, 11 * s, 4.5 * s, 0, 0, 7); ctx.fill();

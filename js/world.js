@@ -138,7 +138,7 @@
     W.objects.forEach((o) => { o.art && keys.add(o.art); o.artOwn && keys.add(o.artOwn); });
     W.places.forEach((p) => keys.add("rooms/" + p.id));
     ["rooms/house"].forEach((k) => keys.add(k));
-    (window.VILLAGE_AGENTS || []).forEach((a) => ["idle", "working", "portrait"].forEach((s) => keys.add("agents/" + a.id + "/" + s)));
+    (window.VILLAGE_AGENTS || []).forEach((a) => ["idle", "working", "walk", "wave", "portrait"].forEach((s) => keys.add("agents/" + a.id + "/" + s)));
     return [...keys];
   };
 

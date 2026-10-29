@@ -32,7 +32,7 @@
     sortBox() { return { x0: this.x - 0.3, x1: this.x + 0.3, y0: this.y - 0.3, y1: this.y + 0.3 }; }
     draw(ctx, t) {
       const p = this.screen();
-      V.art.person(ctx, p.x, p.y, Object.assign({}, this.look, { id: this.id, facing: this.facing, walk: this.moving ? this.walk : null, seed: this.seed, working: this.working }), t);
+      V.art.person(ctx, p.x, p.y, Object.assign({}, this.look, { id: this.id, facing: this.facing, walk: this.moving ? this.walk : null, seed: this.seed, working: this.working, waving: this.waveUntil > AG.now }), t);
     }
   }
   AG.Walker = Walker;
@@ -223,6 +223,7 @@
       }
       const line = c.seq[c.i];
       AG.bubble(line.who, line.text, 2.6);
+      if (c.i < 2) line.who.waveUntil = AG.now + 1.4;
       if (c.married && c.i === 0) AG.burst(line.who, 0);
       c.next = now + 2.7;
       return true;

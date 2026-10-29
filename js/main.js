@@ -148,7 +148,8 @@
     ctx.fillStyle = V.mix("#d9bf8a", "#e7cf9c", L.day); ctx.fillRect(0, 0, w, h);
     ctx.save();
     ctx.translate(w / 2, h / 2); ctx.scale(cam.zoom, cam.zoom); ctx.translate(-cam.x, -cam.y);
-    ctx.drawImage(W.groundCanvas, -W.groundOrigin.x, -W.groundOrigin.y);
+    if (W.drawGround) W.drawGround(ctx);
+    else ctx.drawImage(W.groundCanvas, -W.groundOrigin.x, -W.groundOrigin.y);
     V.sky.drawGround(ctx);
     order = W.painted ? AG.drawables().sort((a, b) => a.y - b.y) : statics.concat(AG.drawables()).sort(cmp);
     order.forEach((d) => (d.obj ? drawStatic(d.obj, t) : d.draw(ctx, t)));

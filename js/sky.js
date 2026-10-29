@@ -129,6 +129,8 @@
   // Screen space: daylight tint, night with lantern light, weather.
   S.drawOverlay = (ctx, w, h, toScreen, zoom, lights, t) => {
     const L = S.light(), wx = S.weather;
+    // A painted map with its own night and weather only needs particles and lantern glow on top.
+    if (V.world.hasLighting && V.world.hasLighting()) return S.drawWeatherOnly(ctx, w, h, toScreen, zoom, lights, t, L);
     const gray = { partly: 0.15, cloudy: 0.35, rain: 0.5, storm: 0.65, snow: 0.3, fog: 0.35 }[wx.kind] || 0;
     let tint = V.mix("#ffffff", "#ffc994", L.golden * 0.75 * (1 - gray * 0.6));
     tint = V.mix(tint, "#b9bfd0", gray * 0.7);
@@ -170,7 +172,27 @@
       }
     }
 
-    // weather
+    S.drawParticles(ctx, w, h, t, L);
+  };
+
+  S.drawWeatherOnly = (ctx, w, h, toScreen, zoom, lights, t, L) => {
+    if (L.night > 0.05) {
+      ctx.save(); ctx.globalCompositeOperation = "lighter";
+      lights.forEach((l) => {
+        const p = toScreen(l.x, l.y), r = l.r * zoom * 0.8;
+        if (p.x < -r || p.y < -r || p.x > w + r || p.y > h + r) return;
+        const flick = 0.85 + Math.sin(t * 6 + l.x) * 0.15;
+        const g = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, r);
+        g.addColorStop(0, `rgba(255,170,80,${0.16 * L.night * flick})`); g.addColorStop(1, "rgba(255,170,80,0)");
+        ctx.fillStyle = g; ctx.beginPath(); ctx.arc(p.x, p.y, r, 0, 7); ctx.fill();
+      });
+      ctx.restore();
+    }
+    S.drawParticles(ctx, w, h, t, L);
+  };
+
+  S.drawParticles = (ctx, w, h, t, L) => {
+    const wx = S.weather;
     if (drops.length) {
       ctx.save(); ctx.strokeStyle = L.night > 0.5 ? "rgba(190,200,230,.45)" : "rgba(110,130,170,.5)"; ctx.lineWidth = 1.2; ctx.beginPath();
       const wind = V.clamp((wx.wind || 5) / 30, 0.05, 1.2) * 0.25;
